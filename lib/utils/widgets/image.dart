@@ -47,8 +47,7 @@ class SquareImageWidget extends StatelessWidget {
         ),
       ),
       placeholder: (context, url) =>
-          placeholder ??
-          SquareShimmerImagePlaceholder(size: placeholderSize ?? size),
+          placeholder ?? SquareShimmerImagePlaceholder(size: placeholderSize ?? size),
       errorWidget: (context, url, dynamic error) =>
           errorWidget ?? SquareImagePlaceholder(size: placeholderSize ?? size),
     );
@@ -122,14 +121,8 @@ class CircleImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ローカルマシンの Django サーバサイドに接続している時などは、
-    // 画像の URL としてふさわしくない文字列が含まれることが多々あり、その度に例外が発生して
-    // 効率が悪いため、常にプレースホルダ画像を表示するようにも設定できるようにしている
-    if (const bool.fromEnvironment('ALWAYS_SHOW_PLACEHOLDER_IMAGE')) {
-      return CircleImagePlaceholder(diameter: diameter);
-    }
     if ((imageURL ?? '').isEmpty) {
-      return CircleImagePlaceholder(diameter: diameter);
+      return placeholder ?? CircleImagePlaceholder(diameter: diameter);
     }
     return CachedNetworkImage(
       fit: BoxFit.cover,
