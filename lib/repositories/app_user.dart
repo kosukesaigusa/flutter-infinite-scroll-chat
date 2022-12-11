@@ -3,10 +3,24 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../firestore_models/app_user.dart';
 import '../firestore_refs.dart';
+import '../utils/extensions/list.dart';
+import '../utils/logger.dart';
 
 final appUserRepositoryProvider = Provider.autoDispose((_) => AppUserRepository());
 
 class AppUserRepository {
+  /// 指定した AppUser を取得する。
+  Future<AppUser?> fetchAppUser({
+    required String appUserId,
+  }) async {
+    final ds = await appUserRef(appUserId: appUserId).get();
+    if (!ds.exists) {
+      logger.warning('Document not found: ${ds.reference.path}');
+      return null;
+    }
+    return ds.data();
+  }
+
   /// 指定した AppUser を購読する。
   Stream<AppUser?> subscribeAppUser({
     required String appUserId,
@@ -15,7 +29,7 @@ class AppUserRepository {
     return docStream.map((ds) => ds.data());
   }
 
-  /// 指定した userId のユーザーを `SetOptions(merge: true)` で作成する。
+  /// 指定した userId のユーザードキュメントを作成する。
   Future<void> setAppUser({
     required String appUserId,
     String? fcmToken,
@@ -23,9 +37,62 @@ class AppUserRepository {
     await appUserRef(appUserId: appUserId).set(
       AppUser(
         appUserId: appUserId,
-        name: 'AAA',
+        name: names.random,
       ),
       SetOptions(merge: true),
     );
   }
 }
+
+final names = [
+  'Colten',
+  'Fip',
+  'Jessie',
+  'Perry',
+  'Mohammed',
+  'Warner',
+  'Tyler',
+  'Dawson',
+  'Camille-Shel',
+  'Nat-Merton',
+  'Mel-Cameron',
+  'Billy',
+  'Darien',
+  'Rickey',
+  'John',
+  'Blaine',
+  'Randall',
+  'Casimir-Anthony',
+  'Carlos',
+  'Elbert',
+  'Kurson',
+  'Carlyle',
+  'Mattie',
+  'Bryan',
+  'Reggie',
+  'Grant',
+  'Innocent',
+  'Gabriel',
+  'Artie',
+  'Owen',
+  'Rich',
+  'Jeffery',
+  'Steve',
+  'Lean-Anton',
+  'Irwin',
+  'Danny',
+  'Martez-Gillian',
+  'Milton',
+  'Ralph',
+  'Lee',
+  'Galton',
+  'Garrick',
+  'Cyril',
+  'Bernard',
+  'Colin',
+  'Euｇene',
+  'Wilf',
+  'Augustin',
+  'Troy',
+  'Vin',
+];

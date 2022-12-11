@@ -27,7 +27,10 @@ final signInAnonymouslyProvider = Provider.autoDispose<Future<void> Function()>(
       if (user == null) {
         throw const AppException(message: '匿名サインインに失敗しました。');
       }
-      await ref.read(appUserRepositoryProvider).setAppUser(appUserId: user.uid);
+      final appUser = await ref.read(appUserRepositoryProvider).fetchAppUser(appUserId: user.uid);
+      if (appUser == null) {
+        await ref.read(appUserRepositoryProvider).setAppUser(appUserId: user.uid);
+      }
     } on FirebaseException catch (e) {
       logger.warning(e.toString());
     } on AppException catch (e) {
