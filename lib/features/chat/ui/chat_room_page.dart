@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../firestore_models/message.dart';
+import '../../../firestore/message.dart';
 import '../../../utils/exceptions/base.dart';
 import '../../../utils/extensions/build_context.dart';
 import '../../../utils/extensions/date_time.dart';

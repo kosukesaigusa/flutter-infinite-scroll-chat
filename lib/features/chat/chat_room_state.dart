@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../firestore_models/message.dart';
+import '../../firestore/message.dart';
 
 part 'chat_room_state.freezed.dart';
 

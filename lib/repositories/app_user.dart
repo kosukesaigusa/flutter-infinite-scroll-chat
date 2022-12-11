@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../firestore_models/app_user.dart';
-import '../firestore_refs.dart';
+import '../firestore/app_user.dart';
+import '../firestore/refs.dart';
 import '../utils/extensions/list.dart';
 import '../utils/logger.dart';
 

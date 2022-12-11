@@ -1,9 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../firestore_models/chat_room.dart';
-import '../../firestore_models/message.dart';
-import '../../firestore_refs.dart';
+import '../../firestore/chat_room.dart';
+import '../../firestore/message.dart';
+import '../../firestore/refs.dart';
 import '../../repositories/chat.dart';
 import '../../utils/exceptions/base.dart';
 import '../../utils/uuid.dart';

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../firestore_models/message.dart';
+import '../../firestore/message.dart';
 import '../../repositories/chat.dart';
 import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
