@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'features/app_user/app_user.dart';
-import 'features/chat/chat_room.dart';
-import 'features/chat/message.dart';
+import 'firestore_models/app_user.dart';
+import 'firestore_models/chat_room.dart';
+import 'firestore_models/message.dart';
 
 final db = FirebaseFirestore.instance;
 

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'features/auth/auth.dart';
 import 'features/routing/root_navigator.dart';
 import 'utils/extensions/build_context.dart';
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(signInAnonymouslyProvider).call();
     return MaterialApp(
       key: UniqueKey(),
       title: 'Flutter Infinite Scroll Chat',
-      theme: ThemeData(primarySwatch: Colors.blue).copyWith(
+      theme: ThemeData(primarySwatch: Colors.deepOrange).copyWith(
         textTheme: TextTheme(
           displayLarge: context.textTheme.displayLarge!.copyWith(
             color: Colors.black87,

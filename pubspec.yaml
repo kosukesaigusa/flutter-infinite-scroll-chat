@@ -29,6 +29,7 @@ dependencies:
   shimmer: 
   simple_logger: 
   tuple:
+  uuid:
 
 dev_dependencies:
   build_runner:

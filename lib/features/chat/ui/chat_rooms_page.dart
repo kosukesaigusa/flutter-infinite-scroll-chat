@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../firestore_models/chat_room.dart';
 import '../../../utils/loading.dart';
 import '../chat.dart';
-import '../chat_room.dart';
 import 'chat_room_page.dart';
 
 class ChatRoomsPage extends HookConsumerWidget {

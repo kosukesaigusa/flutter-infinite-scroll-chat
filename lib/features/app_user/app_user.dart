@@ -1,24 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-part 'app_user.freezed.dart';
-part 'app_user.g.dart';
+import '../../firestore_models/app_user.dart';
+import '../../repositories/app_user.dart';
 
-@freezed
-class AppUser with _$AppUser {
-  const factory AppUser({
-    @Default('') String name,
-    @Default('') String appUserId,
-    @Default('') String imageUrl,
-  }) = _AppUser;
-
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
-
-  factory AppUser.fromDocumentSnapshot(DocumentSnapshot ds) {
-    final data = ds.data()! as Map<String, dynamic>;
-    return AppUser.fromJson(<String, dynamic>{
-      ...data,
-      'appUserId': ds.id,
-    });
-  }
-}
+/// 指定した userId の AppUser ドキュメントを購読する StreamProvider。
+final appUserProvider = StreamProvider.autoDispose.family<AppUser?, String>((ref, userId) {
+  return ref.read(appUserRepositoryProvider).subscribeAppUser(appUserId: userId);
+});

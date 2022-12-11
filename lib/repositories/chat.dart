@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../features/chat/chat_room.dart';
+import '../firestore_models/chat_room.dart';
+import '../firestore_models/message.dart';
 import '../firestore_refs.dart';
 
 final chatRepositoryProvider = Provider.autoDispose<ChatRepository>((_) => ChatRepository());
@@ -63,22 +64,22 @@ class ChatRepository {
   //   return result;
   // }
 
-  // /// Message 一覧を購読する。
-  // Stream<List<Message>> subscribeMessages({
-  //   required String chatRoomId,
-  //   Query<Message>? Function(Query<Message> query)? queryBuilder,
-  //   int Function(Message lhs, Message rhs)? compare,
-  // }) {
-  //   Query<Message> query = messagesRef(chatRoomId: chatRoomId);
-  //   if (queryBuilder != null) {
-  //     query = queryBuilder(query)!;
-  //   }
-  //   return query.snapshots().map((qs) {
-  //     final result = qs.docs.map((qds) => qds.data()).toList();
-  //     if (compare != null) {
-  //       result.sort(compare);
-  //     }
-  //     return result;
-  //   });
-  // }
+  /// Message 一覧を購読する。
+  Stream<List<Message>> subscribeMessages({
+    required String chatRoomId,
+    Query<Message>? Function(Query<Message> query)? queryBuilder,
+    int Function(Message lhs, Message rhs)? compare,
+  }) {
+    Query<Message> query = messagesRef(chatRoomId: chatRoomId);
+    if (queryBuilder != null) {
+      query = queryBuilder(query)!;
+    }
+    return query.snapshots().map((qs) {
+      final result = qs.docs.map((qds) => qds.data()).toList();
+      if (compare != null) {
+        result.sort(compare);
+      }
+      return result;
+    });
+  }
 }
