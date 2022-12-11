@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../firestore_models/chat_room.dart';
+import '../../../utils/loading.dart';
+import '../chat.dart';
+import 'chat_room_page.dart';
+
 class ChatRoomsPage extends HookConsumerWidget {
   const ChatRoomsPage({super.key});
 
@@ -12,7 +17,45 @@ class ChatRoomsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chat Rooms')),
-      body: const SizedBox(),
+      body: ref.watch(chatRooms).when(
+            data: (chatRooms) {
+              return ListView.builder(
+                itemCount: chatRooms.length,
+                itemBuilder: (context, index) => _ChatRoom(chatRooms[index]),
+              );
+            },
+            error: (_, __) => const SizedBox(),
+            loading: PrimarySpinkitCircle.new,
+          ),
+    );
+  }
+}
+
+class _ChatRoom extends HookConsumerWidget {
+  const _ChatRoom(this.chatRoom);
+
+  final ChatRoom chatRoom;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final message = ref.watch(latestMessage(chatRoom.chatRoomId));
+    return InkWell(
+      onTap: () => Navigator.pushNamed<void>(
+        context,
+        ChatRoomPage.location(chatRoomId: chatRoom.chatRoomId),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(chatRoom.chatRoomId),
+            if (message != null) Text(message.content),
+            if (chatRoom.updatedAt.dateTime != null)
+              Text(chatRoom.updatedAt.dateTime!.toIso8601String())
+          ],
+        ),
+      ),
     );
   }
 }

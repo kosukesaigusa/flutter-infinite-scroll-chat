@@ -30,6 +30,16 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCDFivncg9E7JpmsR_Cj2gbcERgt-vlhhA',
+    appId: '1:371757693770:web:71206a8b0284b77c02dfb3',
+    messagingSenderId: '371757693770',
+    projectId: 'flutter-infinite-scroll-chat',
+    authDomain: 'flutter-infinite-scroll-chat.firebaseapp.com',
+    storageBucket: 'flutter-infinite-scroll-chat.appspot.com',
+    measurementId: 'G-WP4SHYPZHJ',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBu6LXs0pMRhi6HNWugdTe_Og7Nois5WC4',
     appId: '1:371757693770:android:4f9a7f91ad02868202dfb3',
