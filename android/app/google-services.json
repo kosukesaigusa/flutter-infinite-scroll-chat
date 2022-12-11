@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "371757693770",
+    "project_id": "flutter-infinite-scroll-chat",
+    "storage_bucket": "flutter-infinite-scroll-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371757693770:android:4f9a7f91ad02868202dfb3",
+        "android_client_info": {
+          "package_name": "com.example.infinite_scroll_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "371757693770-143q7r985s9l8ssp2iku7fh1jkoli3vu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu6LXs0pMRhi6HNWugdTe_Og7Nois5WC4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "371757693770-143q7r985s9l8ssp2iku7fh1jkoli3vu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
