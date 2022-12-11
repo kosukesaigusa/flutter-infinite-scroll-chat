@@ -9,7 +9,5 @@ final chatRoomsProvider = StreamProvider.autoDispose<List<ChatRoom>>(
   (ref) => ref.read(chatRepositoryProvider).subscribeChatRooms(),
 );
 
-final chatRoomControllerProvider =
-    StateNotifierProvider.autoDispose.family<ChatRoomController, ChatRoomState, String>(
-  (ref, chatRoomId) => ChatRoomController(ref, chatRoomId)..initialize(),
-);
+final chatRoomControllerProvider = StateNotifierProvider.autoDispose
+    .family<ChatRoomController, ChatRoomState, String>(ChatRoomController.new);

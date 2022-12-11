@@ -13,7 +13,6 @@ class RootNavigator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(userIdProvider).value;
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Stack(
@@ -30,12 +29,9 @@ class RootNavigator extends HookConsumerWidget {
               return route;
             },
           ),
-          if (userId == null)
-            const ColoredBox(
-              color: Colors.black26,
-              child: SizedBox.expand(),
-            ),
-          if (ref.watch(overlayLoadingProvider) || userId == null) const OverlayLoadingWidget(),
+          if (ref.watch(overlayLoadingProvider)) const OverlayLoadingWidget(),
+          if (!(ref.watch(isSignedInProvider).value ?? false))
+            const ColoredBox(color: Colors.black26, child: SizedBox.expand()),
         ],
       ),
     );

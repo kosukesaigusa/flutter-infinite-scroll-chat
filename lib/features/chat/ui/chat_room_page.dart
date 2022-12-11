@@ -7,14 +7,14 @@ import '../../../firestore_models/message.dart';
 import '../../../utils/exceptions/base.dart';
 import '../../../utils/extensions/build_context.dart';
 import '../../../utils/extensions/date_time.dart';
-import '../../../utils/widgets/image.dart';
+import '../../../utils/extensions/int.dart';
 import '../../app_user/app_user.dart';
 import '../../auth/auth.dart';
 import '../../routing/app_router_state.dart';
 import '../chat.dart';
 
 const double _horizontalPadding = 8;
-const double _partnerImageSize = 36;
+const double _partnerImageSize = 24;
 const _messageBackgroundColor = Color(0xfff1eef1);
 
 final _chatRoomIdProvider = Provider.autoDispose<String>(
@@ -54,47 +54,57 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
     final userId = ref.watch(userIdProvider).value;
     return Scaffold(
       appBar: AppBar(),
-      body: ref.watch(chatRoomControllerProvider(chatRoomId)).loading
-          ? const Center(
-              child: FaIcon(
-                FontAwesomeIcons.solidComment,
-                size: 72,
-                color: Colors.black12,
-              ),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ListView.builder(
-                      controller: ref
-                          .watch(
-                            chatRoomControllerProvider(chatRoomId).notifier,
-                          )
-                          .scrollController,
-                      itemBuilder: (context, index) {
-                        final message = messages[index];
-                        return _MessageItemWidget(
-                          chatRoomId: chatRoomId,
-                          message: message,
-                          showDate: _showDate(
-                            itemCount: messages.length,
-                            index: index,
-                            messages: messages,
-                          ),
-                          isMyMessage: message.senderId == userId,
-                        );
-                      },
-                      itemCount: messages.length,
-                      reverse: true,
-                    ),
+      body: Stack(
+        children: [
+          ref.watch(chatRoomControllerProvider(chatRoomId)).loading
+              ? const Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.solidComment,
+                    size: 72,
+                    color: Colors.black12,
                   ),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: ListView.builder(
+                          controller: ref
+                              .watch(
+                                chatRoomControllerProvider(chatRoomId).notifier,
+                              )
+                              .scrollController,
+                          itemBuilder: (context, index) {
+                            final message = messages[index];
+                            return _MessageItem(
+                              chatRoomId: chatRoomId,
+                              message: message,
+                              showDate: _showDate(
+                                itemCount: messages.length,
+                                index: index,
+                                messages: messages,
+                              ),
+                              isMyMessage: message.senderId == userId,
+                            );
+                          },
+                          itemCount: messages.length,
+                          reverse: true,
+                        ),
+                      ),
+                    ),
+                    _RoomMessageInput(chatRoomId),
+                    const Gap(24),
+                  ],
                 ),
-                _RoomMessageInputWidget(chatRoomId),
-                const Gap(24),
-              ],
+          const Positioned(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _DebugIndicator(),
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -122,9 +132,53 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
   }
 }
 
+class _DebugIndicator extends HookConsumerWidget {
+  const _DebugIndicator();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chatRoomId = ref.watch(_chatRoomIdProvider);
+    final messages = ref.watch(
+      chatRoomControllerProvider(chatRoomId).select((s) => s.messages),
+    );
+    final lastReadDocumentId =
+        ref.watch(chatRoomControllerProvider(chatRoomId)).lastReadQueryDocumentSnapshot?.id;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.black38,
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('デバッグウィンドウ', style: context.titleSmall!.copyWith(color: Colors.white)),
+          const Gap(4),
+          Text(
+            '取得したメッセージ：${messages.length.withComma} 件',
+            style: context.bodySmall!.copyWith(color: Colors.white),
+          ),
+          if (lastReadDocumentId != null) ...[
+            const Gap(4),
+            Text(
+              '最後に取得したドキュメント：$lastReadDocumentId',
+              style: context.bodySmall!.copyWith(color: Colors.white),
+            ),
+          ],
+          const Gap(8),
+        ],
+      ),
+    );
+  }
+}
+
 /// メッセージ、日付、相手のアイコン、送信日時のウィジェット
-class _MessageItemWidget extends HookConsumerWidget {
-  const _MessageItemWidget({
+class _MessageItem extends HookConsumerWidget {
+  const _MessageItem({
     required this.chatRoomId,
     required this.message,
     required this.showDate,
@@ -142,19 +196,28 @@ class _MessageItemWidget extends HookConsumerWidget {
       crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         if (showDate && message.createdAt.dateTime != null)
-          _DateOnChatRoomWidget(message.createdAt.dateTime!),
+          _DateOnChatRoom(message.createdAt.dateTime!),
         Row(
           mainAxisAlignment: isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isMyMessage) ...[
-              _SenderImageWidget(message.senderId),
+              const FaIcon(FontAwesomeIcons.user, size: _partnerImageSize),
               const Gap(8),
             ],
-            _MessageContentWidget(message: message, isMyMessage: isMyMessage),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!isMyMessage) ...[
+                  _SenderName(message.senderId),
+                  const Gap(8),
+                ],
+                _MessageContentWidget(message: message, isMyMessage: isMyMessage),
+              ],
+            ),
           ],
         ),
-        _MessageAdditionalInfoWidget(
+        _MessageAdditionalInfo(
           message: message,
           chatRoomId: chatRoomId,
           isMyMessage: isMyMessage,
@@ -165,8 +228,8 @@ class _MessageItemWidget extends HookConsumerWidget {
 }
 
 /// チャットメッセージの日付
-class _DateOnChatRoomWidget extends StatelessWidget {
-  const _DateOnChatRoomWidget(this.dateTime);
+class _DateOnChatRoom extends StatelessWidget {
+  const _DateOnChatRoom(this.dateTime);
 
   final DateTime dateTime;
 
@@ -191,9 +254,93 @@ class _DateOnChatRoomWidget extends StatelessWidget {
   }
 }
 
+/// メッセージの送り主（相手）の名前を表示するウィジェット。
+class _SenderName extends HookConsumerWidget {
+  const _SenderName(this.senderId);
+
+  final String senderId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(appUserProvider(senderId)).when(
+          data: (appUser) => appUser == null ? const SizedBox() : Text(appUser.name),
+          error: (error, stackTrace) => const SizedBox(),
+          loading: () => const SizedBox(),
+        );
+  }
+}
+
+/// メッセージの本文を表示するウィジェット。
+class _MessageContentWidget extends HookConsumerWidget {
+  const _MessageContentWidget({
+    required this.message,
+    required this.isMyMessage,
+  });
+
+  final Message message;
+  final bool isMyMessage;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth:
+            (MediaQuery.of(context).size.width - _partnerImageSize - _horizontalPadding * 3) * 0.9,
+      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(8),
+          topRight: const Radius.circular(8),
+          bottomLeft: Radius.circular(isMyMessage ? 8 : 0),
+          bottomRight: Radius.circular(isMyMessage ? 0 : 8),
+        ),
+        color: isMyMessage ? context.theme.primaryColor : _messageBackgroundColor,
+      ),
+      child: Text(
+        message.content,
+        style: isMyMessage ? context.bodySmall!.copyWith(color: Colors.white) : context.bodySmall,
+      ),
+    );
+  }
+}
+
+/// 送信日時と未既読などを表示するウィジェット。
+class _MessageAdditionalInfo extends HookConsumerWidget {
+  const _MessageAdditionalInfo({
+    required this.message,
+    required this.chatRoomId,
+    required this.isMyMessage,
+  });
+
+  final Message message;
+  final String chatRoomId;
+  final bool isMyMessage;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: 4,
+        left: isMyMessage ? 0 : _partnerImageSize + _horizontalPadding,
+        bottom: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            to24HourNotationString(message.createdAt.dateTime),
+            style: context.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// ルームページのメッセージ入力欄のウィジェット
-class _RoomMessageInputWidget extends HookConsumerWidget {
-  const _RoomMessageInputWidget(this.chatRoomId);
+class _RoomMessageInput extends HookConsumerWidget {
+  const _RoomMessageInput(this.chatRoomId);
 
   final String chatRoomId;
 
@@ -251,90 +398,6 @@ class _RoomMessageInputWidget extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// メッセージの送り主（相手）の画像を表示するウィジェット。
-class _SenderImageWidget extends HookConsumerWidget {
-  const _SenderImageWidget(this.senderId);
-
-  final String senderId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(appUserProvider(senderId)).when(
-          data: (appUser) => CircleImageWidget(diameter: 36, imageURL: appUser?.imageUrl),
-          error: (error, stackTrace) => const SizedBox(),
-          loading: () => const SizedBox(),
-        );
-  }
-}
-
-/// メッセージの本文を表示するウィジェット。
-class _MessageContentWidget extends HookConsumerWidget {
-  const _MessageContentWidget({
-    required this.message,
-    required this.isMyMessage,
-  });
-
-  final Message message;
-  final bool isMyMessage;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth:
-            (MediaQuery.of(context).size.width - _partnerImageSize - _horizontalPadding * 3) * 0.9,
-      ),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(8),
-          topRight: const Radius.circular(8),
-          bottomLeft: Radius.circular(isMyMessage ? 8 : 0),
-          bottomRight: Radius.circular(isMyMessage ? 0 : 8),
-        ),
-        color: isMyMessage ? context.theme.primaryColor : _messageBackgroundColor,
-      ),
-      child: Text(
-        message.content,
-        style: isMyMessage ? context.bodySmall!.copyWith(color: Colors.white) : context.bodySmall,
-      ),
-    );
-  }
-}
-
-/// 送信日時と未既読などを表示するウィジェット。
-class _MessageAdditionalInfoWidget extends HookConsumerWidget {
-  const _MessageAdditionalInfoWidget({
-    required this.message,
-    required this.chatRoomId,
-    required this.isMyMessage,
-  });
-
-  final Message message;
-  final String chatRoomId;
-  final bool isMyMessage;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 4,
-        left: isMyMessage ? 0 : _partnerImageSize + _horizontalPadding,
-        bottom: 16,
-      ),
-      child: Column(
-        crossAxisAlignment: isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Text(
-            to24HourNotationString(message.createdAt.dateTime),
-            style: context.bodySmall,
-          ),
-        ],
-      ),
     );
   }
 }

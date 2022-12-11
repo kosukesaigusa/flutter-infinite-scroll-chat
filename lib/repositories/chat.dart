@@ -26,43 +26,34 @@ class ChatRepository {
     });
   }
 
-  // /// 指定した ChatRoom を取得する。
-  // Future<ChatRoom?> fetchChatRoom({
-  //   required String chatRoomId,
-  // }) async {
-  //   final ds = await chatRoomRef(chatRoomId: chatRoomId).get();
-  //   if (!ds.exists) {
-  //     logger.warning('Document not found: ${ds.reference.path}');
-  //     return null;
-  //   }
-  //   return ds.data();
-  // }
+  /// 最後に取得したドキュメント以降のメッセージ limit 件の QuerySnapshot を返す。
+  Future<QuerySnapshot<Message>> loadMoreMessagesQuerySnapshot({
+    required int limit,
+    required String chatRoomId,
+    required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
+  }) async {
+    final qs = await _query(
+      limit: limit,
+      chatRoomId: chatRoomId,
+      lastReadQueryDocumentSnapshot: lastReadQueryDocumentSnapshot,
+    ).limit(limit).get();
+    return qs;
+  }
 
-  // /// 指定した ChatRoom を購読する。
-  // Stream<ChatRoom?> subscribeChatRoom({
-  //   required String chatRoomId,
-  // }) {
-  //   final docStream = chatRoomRef(chatRoomId: chatRoomId).snapshots();
-  //   return docStream.map((ds) => ds.data());
-  // }
-
-  // /// Message 一覧を取得する。
-  // Future<List<Message>> fetchMessages({
-  //   required String chatRoomId,
-  //   Query<Message>? Function(Query<Message> query)? queryBuilder,
-  //   int Function(Message lhs, Message rhs)? compare,
-  // }) async {
-  //   Query<Message> query = messagesRef(chatRoomId: chatRoomId);
-  //   if (queryBuilder != null) {
-  //     query = queryBuilder(query)!;
-  //   }
-  //   final qs = await query.get();
-  //   final result = qs.docs.map((qds) => qds.data()).toList();
-  //   if (compare != null) {
-  //     result.sort(compare);
-  //   }
-  //   return result;
-  // }
+  /// 最後に取得したドキュメント以降のメッセージ limit 件を取得するための
+  /// Query<Message> を返す。メッセージの無限スクロールに用いる。
+  Query<Message> _query({
+    required int limit,
+    required String chatRoomId,
+    required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
+  }) {
+    var query = messagesRef(chatRoomId: chatRoomId).orderBy('createdAt', descending: true);
+    final qds = lastReadQueryDocumentSnapshot;
+    if (qds != null) {
+      query = query.startAfterDocument(qds);
+    }
+    return query.limit(limit);
+  }
 
   /// Message 一覧を購読する。
   Stream<List<Message>> subscribeMessages({

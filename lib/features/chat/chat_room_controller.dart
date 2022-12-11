@@ -16,7 +16,9 @@ const _messageLimit = 10;
 const _scrollValueThreshold = 0.8;
 
 class ChatRoomController extends StateNotifier<ChatRoomState> {
-  ChatRoomController(this._ref, this._chatRoomId) : super(const ChatRoomState());
+  ChatRoomController(this._ref, this._chatRoomId) : super(const ChatRoomState()) {
+    _initialize();
+  }
 
   final AutoDisposeStateNotifierProviderRef<ChatRoomController, ChatRoomState> _ref;
   final String _chatRoomId;
@@ -36,7 +38,7 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
 
   /// 初期化処理。
   /// コンストラクタメソッドと一緒にコールする。
-  Future<void> initialize() async {
+  Future<void> _initialize() async {
     _initializeScrollController();
     _initializeNewMessagesSubscription();
     await Future.wait<void>([
@@ -64,7 +66,7 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
     });
   }
 
-  /// TextEditingController を初期化してリスナーを設定する
+  /// TextEditingController を初期化してリスナーを設定する。
   Future<void> _initializeTextEditingController() async {
     textEditingController = TextEditingController();
     textEditingController.addListener(() {
@@ -85,15 +87,15 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
     });
   }
 
-  /// 無限スクロールのクエリ
-  Query<Message> get _query {
-    var query = messagesRef(chatRoomId: _chatRoomId).orderBy('createdAt', descending: true);
-    final qds = state.lastReadQueryDocumentSnapshot;
-    if (qds != null) {
-      query = query.startAfterDocument(qds);
-    }
-    return query.limit(_messageLimit);
-  }
+  // /// 無限スクロールのクエリ。
+  // Query<Message> get _query {
+  //   var query = messagesRef(chatRoomId: _chatRoomId).orderBy('createdAt', descending: true);
+  //   final qds = state.lastReadQueryDocumentSnapshot;
+  //   if (qds != null) {
+  //     query = query.startAfterDocument(qds);
+  //   }
+  //   return query.limit(_messageLimit);
+  // }
 
   /// 表示するメッセージを更新する
   void _updateMessages() {
@@ -150,7 +152,11 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
       return;
     }
     state = state.copyWith(fetching: true);
-    final qs = await _query.limit(_messageLimit).get();
+    final qs = await _ref.read(chatRepositoryProvider).loadMoreMessagesQuerySnapshot(
+          limit: _messageLimit,
+          chatRoomId: _chatRoomId,
+          lastReadQueryDocumentSnapshot: state.lastReadQueryDocumentSnapshot,
+        );
     final messages = qs.docs.map((qds) => qds.data()).toList();
     state = state.copyWith(pastMessages: [...state.pastMessages, ...messages]);
     _updateMessages();
