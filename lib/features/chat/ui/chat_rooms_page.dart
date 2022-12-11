@@ -31,13 +31,14 @@ class ChatRoomsPage extends HookConsumerWidget {
   }
 }
 
-class _ChatRoom extends StatelessWidget {
+class _ChatRoom extends HookConsumerWidget {
   const _ChatRoom(this.chatRoom);
 
   final ChatRoom chatRoom;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final latestMessage = ref.watch(latestMessageProvider(chatRoom.chatRoomId));
     return InkWell(
       onTap: () => Navigator.pushNamed<void>(
         context,
@@ -49,6 +50,7 @@ class _ChatRoom extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(chatRoom.chatRoomId),
+            if (latestMessage != null) Text(latestMessage.content),
             if (chatRoom.updatedAt.dateTime != null)
               Text(chatRoom.updatedAt.dateTime!.toIso8601String())
           ],
