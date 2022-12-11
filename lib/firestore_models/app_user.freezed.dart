@@ -22,7 +22,6 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) {
 mixin _$AppUser {
   String get name => throw _privateConstructorUsedError;
   String get appUserId => throw _privateConstructorUsedError;
-  String get imageUrl => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -34,7 +33,7 @@ abstract class $AppUserCopyWith<$Res> {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) then) =
       _$AppUserCopyWithImpl<$Res, AppUser>;
   @useResult
-  $Res call({String name, String appUserId, String imageUrl});
+  $Res call({String name, String appUserId});
 }
 
 /// @nodoc
@@ -52,7 +51,6 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
   $Res call({
     Object? name = null,
     Object? appUserId = null,
-    Object? imageUrl = null,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -62,10 +60,6 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
       appUserId: null == appUserId
           ? _value.appUserId
           : appUserId // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -78,7 +72,7 @@ abstract class _$$_AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
       __$$_AppUserCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String appUserId, String imageUrl});
+  $Res call({String name, String appUserId});
 }
 
 /// @nodoc
@@ -93,7 +87,6 @@ class __$$_AppUserCopyWithImpl<$Res>
   $Res call({
     Object? name = null,
     Object? appUserId = null,
-    Object? imageUrl = null,
   }) {
     return _then(_$_AppUser(
       name: null == name
@@ -104,10 +97,6 @@ class __$$_AppUserCopyWithImpl<$Res>
           ? _value.appUserId
           : appUserId // ignore: cast_nullable_to_non_nullable
               as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
     ));
   }
 }
@@ -115,7 +104,7 @@ class __$$_AppUserCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$_AppUser implements _AppUser {
-  const _$_AppUser({this.name = '', this.appUserId = '', this.imageUrl = ''});
+  const _$_AppUser({this.name = '', this.appUserId = ''});
 
   factory _$_AppUser.fromJson(Map<String, dynamic> json) =>
       _$$_AppUserFromJson(json);
@@ -126,13 +115,10 @@ class _$_AppUser implements _AppUser {
   @override
   @JsonKey()
   final String appUserId;
-  @override
-  @JsonKey()
-  final String imageUrl;
 
   @override
   String toString() {
-    return 'AppUser(name: $name, appUserId: $appUserId, imageUrl: $imageUrl)';
+    return 'AppUser(name: $name, appUserId: $appUserId)';
   }
 
   @override
@@ -142,14 +128,12 @@ class _$_AppUser implements _AppUser {
             other is _$_AppUser &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.appUserId, appUserId) ||
-                other.appUserId == appUserId) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl));
+                other.appUserId == appUserId));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, name, appUserId, imageUrl);
+  int get hashCode => Object.hash(runtimeType, name, appUserId);
 
   @JsonKey(ignore: true)
   @override
@@ -166,10 +150,8 @@ class _$_AppUser implements _AppUser {
 }
 
 abstract class _AppUser implements AppUser {
-  const factory _AppUser(
-      {final String name,
-      final String appUserId,
-      final String imageUrl}) = _$_AppUser;
+  const factory _AppUser({final String name, final String appUserId}) =
+      _$_AppUser;
 
   factory _AppUser.fromJson(Map<String, dynamic> json) = _$_AppUser.fromJson;
 
@@ -177,8 +159,6 @@ abstract class _AppUser implements AppUser {
   String get name;
   @override
   String get appUserId;
-  @override
-  String get imageUrl;
   @override
   @JsonKey(ignore: true)
   _$$_AppUserCopyWith<_$_AppUser> get copyWith =>

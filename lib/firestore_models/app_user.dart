@@ -9,7 +9,6 @@ class AppUser with _$AppUser {
   const factory AppUser({
     @Default('') String name,
     @Default('') String appUserId,
-    @Default('') String imageUrl,
   }) = _AppUser;
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
