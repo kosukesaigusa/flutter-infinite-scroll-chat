@@ -6,9 +6,9 @@ import '../../utils/extensions/string.dart';
 import 'constants/snack_bar.dart';
 import 'constants/string.dart';
 
-final scaffoldMessengerKeyProvider = Provider((_) => GlobalKey<ScaffoldMessengerState>());
+final scaffoldMessengerKey = Provider((_) => GlobalKey<ScaffoldMessengerState>());
 
-final scaffoldMessengerServiceProvider = Provider.autoDispose(ScaffoldMessengerService.new);
+final scaffoldMessengerService = Provider.autoDispose(ScaffoldMessengerService.new);
 
 /// ツリー上部の ScaffoldMessenger 上でスナックバーやダイアログの表示を操作する。
 class ScaffoldMessengerService {
@@ -16,8 +16,7 @@ class ScaffoldMessengerService {
 
   final AutoDisposeProviderRef<ScaffoldMessengerService> _ref;
 
-  GlobalKey<ScaffoldMessengerState> get scaffoldMessengerKey =>
-      _ref.read(scaffoldMessengerKeyProvider);
+  GlobalKey<ScaffoldMessengerState> get globalKey => _ref.read(scaffoldMessengerKey);
 
   /// showDialog で指定したビルダー関数を返す。
   Future<T?> showDialogByBuilder<T>({
@@ -25,7 +24,7 @@ class ScaffoldMessengerService {
     bool barrierDismissible = true,
   }) {
     return showDialog<T>(
-      context: scaffoldMessengerKey.currentContext!,
+      context: globalKey.currentContext!,
       barrierDismissible: barrierDismissible,
       builder: builder,
     );
@@ -36,7 +35,7 @@ class ScaffoldMessengerService {
     required Widget Function(BuildContext) builder,
   }) async {
     return showModalBottomSheet<T>(
-      context: scaffoldMessengerKey.currentContext!,
+      context: globalKey.currentContext!,
       builder: builder,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -53,7 +52,7 @@ class ScaffoldMessengerService {
     bool removeCurrentSnackBar = true,
     Duration duration = defaultSnackBarDuration,
   }) {
-    final scaffoldMessengerState = scaffoldMessengerKey.currentState!;
+    final scaffoldMessengerState = globalKey.currentState!;
     if (removeCurrentSnackBar) {
       scaffoldMessengerState.removeCurrentSnackBar();
     }
@@ -90,7 +89,7 @@ class ScaffoldMessengerService {
     bool removeCurrentSnackBar = true,
     List<Widget> actions = const <Widget>[],
   }) {
-    final scaffoldMessengerState = scaffoldMessengerKey.currentState!;
+    final scaffoldMessengerState = globalKey.currentState!;
     if (removeCurrentSnackBar) {
       scaffoldMessengerState.removeCurrentSnackBar();
     }

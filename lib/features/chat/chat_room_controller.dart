@@ -5,64 +5,64 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../firestore_models/message.dart';
-import '../../firestore_refs.dart';
 import '../../repositories/chat.dart';
+import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
-import '../../utils/uuid.dart';
-import '../auth/auth.dart';
-import 'chat_room_state.dart';
+import 'chat.dart';
 
-const _messageLimit = 10;
+/// 無限スクロールで取得するメッセージ件数の limit 値。
+const _limit = 10;
+
+/// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
 const _scrollValueThreshold = 0.8;
 
-class ChatRoomController extends StateNotifier<ChatRoomState> {
-  ChatRoomController(this._ref, this._chatRoomId) : super(const ChatRoomState()) {
+final chatRoomController =
+    Provider.autoDispose.family<ChatRoomController, String>(ChatRoomController.new);
+
+/// チャットルームページでの各種操作を行うコントローラ。
+class ChatRoomController {
+  ChatRoomController(
+    this._ref,
+    this._chatRoomId,
+  ) : _chat = _ref.read(chatModel(_chatRoomId).notifier) {
     _initialize();
-  }
-
-  final AutoDisposeStateNotifierProviderRef<ChatRoomController, ChatRoomState> _ref;
-  final String _chatRoomId;
-  late StreamSubscription<List<Message>> _newMessagesSubscription;
-  late TextEditingController textEditingController;
-  late ScrollController scrollController;
-
-  @override
-  void dispose() {
-    Future<void>(() async {
-      super.dispose();
+    _ref.onDispose(() async {
       await _newMessagesSubscription.cancel();
       textEditingController.dispose();
       scrollController.dispose();
     });
   }
 
+  final AutoDisposeProviderRef<ChatRoomController> _ref;
+  final String _chatRoomId;
+  final Chat _chat;
+  late StreamSubscription<List<Message>> _newMessagesSubscription;
+  late TextEditingController textEditingController;
+  late ScrollController scrollController;
+
   /// 初期化処理。
   /// コンストラクタメソッドと一緒にコールする。
   Future<void> _initialize() async {
     _initializeScrollController();
     _initializeNewMessagesSubscription();
-    await Future.wait<void>([
-      _initializeTextEditingController(),
-      loadMore(),
-      Future<void>.delayed(const Duration(milliseconds: 500)),
-    ]);
-    state = state.copyWith(loading: false);
+    await _initializeTextEditingController();
   }
 
   /// 読み取り開始時刻以降のメッセージを購読して
   /// 画面に表示する messages に反映させるリスナーを初期化する。
   void _initializeNewMessagesSubscription() {
     _newMessagesSubscription = _ref
-        .read(chatRepositoryProvider)
+        .read(chatRepository)
         .subscribeMessages(
           chatRoomId: _chatRoomId,
           queryBuilder: (q) => q
               .orderBy('createdAt', descending: true)
               .where('createdAt', isGreaterThanOrEqualTo: DateTime.now()),
         )
-        .listen((messages) async {
-      state = state.copyWith(newMessages: messages);
-      _updateMessages();
+        .listen((newMessages) async {
+      _chat
+        ..updateNewMessages(newMessages)
+        ..updateMessages();
     });
   }
 
@@ -70,8 +70,7 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
   Future<void> _initializeTextEditingController() async {
     textEditingController = TextEditingController();
     textEditingController.addListener(() {
-      final text = textEditingController.text;
-      state = state.copyWith(isValid: text.isNotEmpty);
+      _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
     });
   }
 
@@ -82,56 +81,25 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
     scrollController.addListener(() async {
       final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
       if (scrollValue > _scrollValueThreshold) {
-        await loadMore();
+        await _chat.loadMore(limit: _limit);
       }
     });
   }
 
-  // /// 無限スクロールのクエリ。
-  // Query<Message> get _query {
-  //   var query = messagesRef(chatRoomId: _chatRoomId).orderBy('createdAt', descending: true);
-  //   final qds = state.lastReadQueryDocumentSnapshot;
-  //   if (qds != null) {
-  //     query = query.startAfterDocument(qds);
-  //   }
-  //   return query.limit(_messageLimit);
-  // }
-
-  /// 表示するメッセージを更新する
-  void _updateMessages() {
-    state = state.copyWith(messages: [...state.newMessages, ...state.pastMessages]);
-  }
-
-  /// メッセージを送信する
+  /// メッセージを送信する。
   Future<void> send() async {
-    if (state.sending) {
-      return;
-    }
-    final userId = _ref.read(userIdProvider).value;
-    if (userId == null) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('メッセージの送信にはログインが必要です。');
-      return;
-    }
-    state = state.copyWith(sending: true);
     final text = textEditingController.value.text;
     if (text.isEmpty) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('内容を入力してください。');
+      _ref.read(scaffoldMessengerService).showSnackBar('内容を入力してください。');
       return;
     }
-    final message = Message(
-      messageId: uuid,
-      senderId: userId,
-      content: text,
-    );
     try {
-      await messageRef(
-        chatRoomId: _chatRoomId,
-        messageId: message.messageId,
-      ).set(message);
+      await _chat.sendMessage(text: text);
+    } on AppException catch (e) {
+      _ref.read(scaffoldMessengerService).showSnackBarByException(e);
     } on FirebaseException catch (e) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
+      _ref.read(scaffoldMessengerService).showSnackBarByFirebaseException(e);
     } finally {
-      state = state.copyWith(sending: false);
       textEditingController.clear();
       await scrollController.animateTo(
         0,
@@ -139,31 +107,5 @@ class ChatRoomController extends StateNotifier<ChatRoomState> {
         curve: Curves.linear,
       );
     }
-  }
-
-  /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
-  /// limit 件だけ取得する。
-  Future<void> loadMore() async {
-    if (!state.hasMore) {
-      state = state.copyWith(fetching: false);
-      return;
-    }
-    if (state.fetching) {
-      return;
-    }
-    state = state.copyWith(fetching: true);
-    final qs = await _ref.read(chatRepositoryProvider).loadMoreMessagesQuerySnapshot(
-          limit: _messageLimit,
-          chatRoomId: _chatRoomId,
-          lastReadQueryDocumentSnapshot: state.lastReadQueryDocumentSnapshot,
-        );
-    final messages = qs.docs.map((qds) => qds.data()).toList();
-    state = state.copyWith(pastMessages: [...state.pastMessages, ...messages]);
-    _updateMessages();
-    state = state.copyWith(
-      fetching: false,
-      lastReadQueryDocumentSnapshot: qs.docs.isNotEmpty ? qs.docs.last : null,
-      hasMore: qs.docs.length >= _messageLimit,
-    );
   }
 }

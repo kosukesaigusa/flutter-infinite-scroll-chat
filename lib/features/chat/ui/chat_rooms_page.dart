@@ -17,14 +17,14 @@ class ChatRoomsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chat Rooms')),
-      body: ref.watch(chatRoomsProvider).when(
+      body: ref.watch(chatRooms).when(
             data: (chatRooms) {
               return ListView.builder(
                 itemCount: chatRooms.length,
                 itemBuilder: (context, index) => _ChatRoom(chatRooms[index]),
               );
             },
-            error: (_, __) => Text(_.toString()),
+            error: (_, __) => const SizedBox(),
             loading: PrimarySpinkitCircle.new,
           ),
     );
@@ -38,7 +38,7 @@ class _ChatRoom extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final latestMessage = ref.watch(latestMessageProvider(chatRoom.chatRoomId));
+    final message = ref.watch(latestMessage(chatRoom.chatRoomId));
     return InkWell(
       onTap: () => Navigator.pushNamed<void>(
         context,
@@ -50,7 +50,7 @@ class _ChatRoom extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(chatRoom.chatRoomId),
-            if (latestMessage != null) Text(latestMessage.content),
+            if (message != null) Text(message.content),
             if (chatRoom.updatedAt.dateTime != null)
               Text(chatRoom.updatedAt.dateTime!.toIso8601String())
           ],

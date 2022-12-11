@@ -5,7 +5,7 @@ import '../firestore_models/chat_room.dart';
 import '../firestore_models/message.dart';
 import '../firestore_refs.dart';
 
-final chatRepositoryProvider = Provider.autoDispose<ChatRepository>((_) => ChatRepository());
+final chatRepository = Provider.autoDispose<ChatRepository>((_) => ChatRepository());
 
 class ChatRepository {
   /// ChatRoom 一覧を購読する。

@@ -6,7 +6,7 @@ import '../firestore_refs.dart';
 import '../utils/extensions/list.dart';
 import '../utils/logger.dart';
 
-final appUserRepositoryProvider = Provider.autoDispose((_) => AppUserRepository());
+final appUserRepository = Provider.autoDispose((_) => AppUserRepository());
 
 class AppUserRepository {
   /// 指定した AppUser を取得する。

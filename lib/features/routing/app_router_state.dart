@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../utils/exceptions/base.dart';
 import '../../utils/logger.dart';
 
-final appRouterStateProvider = Provider<AppRouterState>(
+final appRouterState = Provider<AppRouterState>(
   (_) => throw const AppException(message: 'データが見つかりませんでした。'),
 );
 
@@ -54,9 +54,9 @@ class AppRouterState {
 /// ```
 ///
 /// のようにして使用する。
-final extractExtraDataProvider = Provider.autoDispose(
+final extractExtraData = Provider.autoDispose(
   (ref) => <T>() {
-    final state = ref.read(appRouterStateProvider);
+    final state = ref.read(appRouterState);
     try {
       final data = state.extra as T?;
       return data;
@@ -69,5 +69,5 @@ final extractExtraDataProvider = Provider.autoDispose(
       return null;
     }
   },
-  dependencies: <ProviderOrFamily>[appRouterStateProvider],
+  dependencies: <ProviderOrFamily>[appRouterState],
 );
