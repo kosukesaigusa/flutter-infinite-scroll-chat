@@ -14,9 +14,14 @@ import '../../routing/app_router_state.dart';
 import '../chat.dart';
 import '../chat_room_controller.dart';
 
+/// 複数箇所で指定している水平方向の Padding。
 const double _horizontalPadding = 8;
-const double _partnerImageSize = 24;
-const _messageBackgroundColor = Color(0xfff1eef1);
+
+/// メッセージ送信者のアイコンサイズ。
+const double _senderIconSize = 24;
+
+/// 複数箇所で指定している背景等のグレー色。
+const _backgroundGrey = Color(0xfff1eef1);
 
 final _chatRoomId = Provider.autoDispose<String>(
   (ref) {
@@ -33,7 +38,7 @@ final _chatRoomId = Provider.autoDispose<String>(
   ],
 );
 
-/// チャットルームページ
+/// チャットルームページ。
 class ChatRoomPage extends StatefulHookConsumerWidget {
   const ChatRoomPage({super.key});
 
@@ -197,7 +202,7 @@ class _MessageItem extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isMyMessage) ...[
-              const FaIcon(FontAwesomeIcons.user, size: _partnerImageSize),
+              const FaIcon(FontAwesomeIcons.user, size: _senderIconSize),
               const Gap(8),
             ],
             Column(
@@ -237,7 +242,7 @@ class _DateOnChatRoom extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: _messageBackgroundColor,
+            color: _backgroundGrey,
           ),
           child: Text(
             toIsoStringDateWithWeekDay(dateTime),
@@ -280,7 +285,7 @@ class _MessageContentWidget extends HookConsumerWidget {
     return Container(
       constraints: BoxConstraints(
         maxWidth:
-            (MediaQuery.of(context).size.width - _partnerImageSize - _horizontalPadding * 3) * 0.9,
+            (MediaQuery.of(context).size.width - _senderIconSize - _horizontalPadding * 3) * 0.9,
       ),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -290,7 +295,7 @@ class _MessageContentWidget extends HookConsumerWidget {
           bottomLeft: Radius.circular(isMyMessage ? 8 : 0),
           bottomRight: Radius.circular(isMyMessage ? 0 : 8),
         ),
-        color: isMyMessage ? context.theme.primaryColor : _messageBackgroundColor,
+        color: isMyMessage ? context.theme.primaryColor : _backgroundGrey,
       ),
       child: Text(
         message.content,
@@ -317,7 +322,7 @@ class _MessageAdditionalInfo extends HookConsumerWidget {
     return Padding(
       padding: EdgeInsets.only(
         top: 4,
-        left: isMyMessage ? 0 : _partnerImageSize + _horizontalPadding,
+        left: isMyMessage ? 0 : _senderIconSize + _horizontalPadding,
         bottom: 16,
       ),
       child: Column(
@@ -348,7 +353,7 @@ class _RoomMessageInput extends HookConsumerWidget {
             margin: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(16)),
-              color: _messageBackgroundColor,
+              color: _backgroundGrey,
             ),
             child: TextField(
               controller: ref.watch(chatRoomController(chatRoomId)).textEditingController,
