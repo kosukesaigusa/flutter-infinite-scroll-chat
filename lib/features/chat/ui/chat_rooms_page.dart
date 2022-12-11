@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../utils/loading.dart';
 import '../chat.dart';
 import '../chat_room.dart';
+import 'chat_room_page.dart';
 
 class ChatRoomsPage extends HookConsumerWidget {
   const ChatRoomsPage({super.key});
@@ -38,7 +39,10 @@ class _ChatRoom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () => Navigator.pushNamed<void>(
+        context,
+        ChatRoomPage.location(chatRoomId: chatRoom.chatRoomId),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
