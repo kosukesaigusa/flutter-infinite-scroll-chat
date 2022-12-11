@@ -25,6 +25,10 @@ dependencies:
   hooks_riverpod:
   intl:
   json_annotation:
+  path_to_regexp: 
+  shimmer: 
+  simple_logger: 
+  tuple:
 
 dev_dependencies:
   build_runner:
