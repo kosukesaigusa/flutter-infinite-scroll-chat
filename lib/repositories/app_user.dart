@@ -6,6 +6,11 @@ import '../firestore/refs.dart';
 import '../utils/extensions/list.dart';
 import '../utils/logger.dart';
 
+///
+final baseAppUserRepositoryProvider =
+    Provider.autoDispose<BaseAppUserRepository>((_) => throw UnimplementedError());
+
+///
 abstract class BaseAppUserRepository {
   /// 指定した AppUser を取得する。
   Future<AppUser?> fetchAppUser({required String appUserId});
@@ -17,9 +22,10 @@ abstract class BaseAppUserRepository {
   Future<void> setAppUser({required String appUserId});
 }
 
-final baseAppUserRepositoryProvider =
+final appUserRepositoryProvider =
     Provider.autoDispose<BaseAppUserRepository>((_) => AppUserRepository());
 
+///
 class AppUserRepository implements BaseAppUserRepository {
   @override
   Future<AppUser?> fetchAppUser({required String appUserId}) async {

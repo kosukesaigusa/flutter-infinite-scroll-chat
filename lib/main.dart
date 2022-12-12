@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'app.dart';
 import 'firebase_options.dart';
+import 'repositories/app_user.dart';
+import 'repositories/chat.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +15,12 @@ Future<void> main() async {
   // Firebase を初期化する。
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
-    const ProviderScope(
-      child: App(),
+    ProviderScope(
+      overrides: [
+        baseAppUserRepositoryProvider.overrideWith((ref) => ref.read(appUserRepositoryProvider)),
+        baseChatRepositoryProvider.overrideWith((ref) => ref.read(chatRepositoryProvider)),
+      ],
+      child: const App(),
     ),
   );
 }

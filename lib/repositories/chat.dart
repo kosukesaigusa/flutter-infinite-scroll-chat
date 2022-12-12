@@ -5,6 +5,11 @@ import '../firestore/chat_room.dart';
 import '../firestore/message.dart';
 import '../firestore/refs.dart';
 
+///
+final baseChatRepositoryProvider =
+    Provider.autoDispose<BaseChatRepository>((_) => throw UnimplementedError());
+
+///
 abstract class BaseChatRepository {
   /// ChatRoom 一覧を購読する。
   Stream<List<ChatRoom>> subscribeChatRooms({
@@ -27,9 +32,10 @@ abstract class BaseChatRepository {
   });
 }
 
-final baseChatRepositoryProvider =
-    Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
+///
+final chatRepositoryProvider = Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
 
+///
 class ChatRepository implements BaseChatRepository {
   @override
   Stream<List<ChatRoom>> subscribeChatRooms({
