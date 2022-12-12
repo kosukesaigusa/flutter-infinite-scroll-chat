@@ -6,9 +6,9 @@ import '../../utils/extensions/string.dart';
 import 'constants/snack_bar.dart';
 import 'constants/string.dart';
 
-final scaffoldMessengerKey = Provider((_) => GlobalKey<ScaffoldMessengerState>());
+final scaffoldMessengerKeyProvider = Provider((_) => GlobalKey<ScaffoldMessengerState>());
 
-final scaffoldMessengerService = Provider.autoDispose(ScaffoldMessengerService.new);
+final scaffoldMessengerServiceProvider = Provider.autoDispose(ScaffoldMessengerService.new);
 
 /// ツリー上部の ScaffoldMessenger 上でスナックバーやダイアログの表示を操作する。
 class ScaffoldMessengerService {
@@ -16,7 +16,7 @@ class ScaffoldMessengerService {
 
   final AutoDisposeProviderRef<ScaffoldMessengerService> _ref;
 
-  GlobalKey<ScaffoldMessengerState> get globalKey => _ref.read(scaffoldMessengerKey);
+  GlobalKey<ScaffoldMessengerState> get globalKey => _ref.read(scaffoldMessengerKeyProvider);
 
   /// showDialog で指定したビルダー関数を返す。
   Future<T?> showDialogByBuilder<T>({

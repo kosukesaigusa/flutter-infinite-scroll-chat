@@ -25,7 +25,7 @@ const _backgroundGrey = Color(0xfff1eef1);
 
 final _chatRoomId = Provider.autoDispose<String>(
   (ref) {
-    final state = ref.watch(appRouterState);
+    final state = ref.watch(appRouterStateProvider);
     final chatRoomId = state.params['chatRoomId'];
     if (chatRoomId == null) {
       throw const AppException(message: 'チャットルームが見つかりませんでした。');
@@ -34,7 +34,7 @@ final _chatRoomId = Provider.autoDispose<String>(
   },
   dependencies: [
     extractExtraData,
-    appRouterState,
+    appRouterStateProvider,
   ],
 );
 
@@ -54,10 +54,10 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
   @override
   Widget build(BuildContext context) {
     final chatRoomId = ref.watch(_chatRoomId);
-    final controller = ref.watch(chatRoomController(chatRoomId));
-    final messages = ref.watch(chatModel(chatRoomId).select((s) => s.messages));
-    final loading = ref.watch(chatModel(chatRoomId).select((s) => s.loading));
-    final userId = ref.watch(userIdAsyncValue).value;
+    final controller = ref.watch(chatRoomControllerProvider(chatRoomId));
+    final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
+    final loading = ref.watch(chatProvider(chatRoomId).select((s) => s.loading));
+    final userId = ref.watch(userIdAsyncValueProvider).value;
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
@@ -140,9 +140,9 @@ class _DebugIndicator extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatRoomId = ref.watch(_chatRoomId);
-    final messages = ref.watch(chatModel(chatRoomId).select((s) => s.messages));
+    final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
     final lastReadDocumentId =
-        ref.watch(chatModel(chatRoomId).select((s) => s.lastReadQueryDocumentSnapshot))?.id;
+        ref.watch(chatProvider(chatRoomId).select((s) => s.lastReadQueryDocumentSnapshot))?.id;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -262,7 +262,7 @@ class _SenderName extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(appUser(senderId)).when(
+    return ref.watch(appUserProvider(senderId)).when(
           data: (appUser) => appUser == null ? const SizedBox() : Text(appUser.name),
           error: (error, stackTrace) => const SizedBox(),
           loading: () => const SizedBox(),
@@ -356,7 +356,7 @@ class _RoomMessageInput extends HookConsumerWidget {
               color: _backgroundGrey,
             ),
             child: TextField(
-              controller: ref.watch(chatRoomController(chatRoomId)).textEditingController,
+              controller: ref.watch(chatRoomControllerProvider(chatRoomId)).textEditingController,
               minLines: 1,
               maxLines: 5,
               decoration: InputDecoration(
@@ -378,10 +378,10 @@ class _RoomMessageInput extends HookConsumerWidget {
         ),
         GestureDetector(
           onTap: () async {
-            if (!ref.read(chatModel(chatRoomId)).isValid) {
+            if (!ref.read(chatProvider(chatRoomId)).isValid) {
               return;
             }
-            await ref.read(chatRoomController(chatRoomId)).send();
+            await ref.read(chatRoomControllerProvider(chatRoomId)).send();
           },
           child: Container(
             margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
@@ -389,7 +389,7 @@ class _RoomMessageInput extends HookConsumerWidget {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: ref.watch(chatModel(chatRoomId)).isValid
+              color: ref.watch(chatProvider(chatRoomId)).isValid
                   ? context.theme.primaryColor
                   : context.theme.disabledColor,
             ),

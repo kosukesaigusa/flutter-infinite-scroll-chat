@@ -10,7 +10,7 @@ import 'app_route.dart';
 import 'app_router_state.dart';
 import 'app_routes.dart';
 
-final appRouter = Provider<AppRouter>((_) => AppRouter(appRoutes));
+final appRouterProvider = Provider<AppRouter>((_) => AppRouter(appRoutes));
 
 class AppRouter {
   AppRouter(this.appRoutes);

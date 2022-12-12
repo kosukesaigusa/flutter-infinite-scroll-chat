@@ -5,10 +5,32 @@ import '../firestore/chat_room.dart';
 import '../firestore/message.dart';
 import '../firestore/refs.dart';
 
-final chatRepository = Provider.autoDispose<ChatRepository>((_) => ChatRepository());
-
-class ChatRepository {
+abstract class BaseChatRepository {
   /// ChatRoom 一覧を購読する。
+  Stream<List<ChatRoom>> subscribeChatRooms({
+    Query<ChatRoom>? Function(Query<ChatRoom> query)? queryBuilder,
+    int Function(ChatRoom lhs, ChatRoom rhs)? compare,
+  });
+
+  /// 最後に取得したドキュメント以降のメッセージ limit 件の QuerySnapshot を返す。
+  Future<QuerySnapshot<Message>> loadMoreMessagesQuerySnapshot({
+    required int limit,
+    required String chatRoomId,
+    required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
+  });
+
+  /// Message 一覧を購読する。
+  Stream<List<Message>> subscribeMessages({
+    required String chatRoomId,
+    Query<Message>? Function(Query<Message> query)? queryBuilder,
+    int Function(Message lhs, Message rhs)? compare,
+  });
+}
+
+final chatRepository = Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
+
+class ChatRepository implements BaseChatRepository {
+  @override
   Stream<List<ChatRoom>> subscribeChatRooms({
     Query<ChatRoom>? Function(Query<ChatRoom> query)? queryBuilder,
     int Function(ChatRoom lhs, ChatRoom rhs)? compare,
@@ -26,7 +48,7 @@ class ChatRepository {
     });
   }
 
-  /// 最後に取得したドキュメント以降のメッセージ limit 件の QuerySnapshot を返す。
+  @override
   Future<QuerySnapshot<Message>> loadMoreMessagesQuerySnapshot({
     required int limit,
     required String chatRoomId,
@@ -55,7 +77,7 @@ class ChatRepository {
     return query.limit(limit);
   }
 
-  /// Message 一覧を購読する。
+  @override
   Stream<List<Message>> subscribeMessages({
     required String chatRoomId,
     Query<Message>? Function(Query<Message> query)? queryBuilder,

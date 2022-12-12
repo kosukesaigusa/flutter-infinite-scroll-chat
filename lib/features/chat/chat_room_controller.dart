@@ -16,7 +16,7 @@ const _limit = 10;
 /// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
 const _scrollValueThreshold = 0.8;
 
-final chatRoomController =
+final chatRoomControllerProvider =
     Provider.autoDispose.family<ChatRoomController, String>(ChatRoomController.new);
 
 /// チャットルームページでの各種操作を行うコントローラ。
@@ -24,7 +24,7 @@ class ChatRoomController {
   ChatRoomController(
     this._ref,
     this._chatRoomId,
-  ) : _chat = _ref.read(chatModel(_chatRoomId).notifier) {
+  ) : _chat = _ref.read(chatProvider(_chatRoomId).notifier) {
     _initialize();
     _ref.onDispose(() async {
       await _newMessagesSubscription.cancel();
@@ -90,15 +90,15 @@ class ChatRoomController {
   Future<void> send() async {
     final text = textEditingController.value.text;
     if (text.isEmpty) {
-      _ref.read(scaffoldMessengerService).showSnackBar('内容を入力してください。');
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('内容を入力してください。');
       return;
     }
     try {
       await _chat.sendMessage(text: text);
     } on AppException catch (e) {
-      _ref.read(scaffoldMessengerService).showSnackBarByException(e);
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
     } on FirebaseException catch (e) {
-      _ref.read(scaffoldMessengerService).showSnackBarByFirebaseException(e);
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
     } finally {
       textEditingController.clear();
       await scrollController.animateTo(

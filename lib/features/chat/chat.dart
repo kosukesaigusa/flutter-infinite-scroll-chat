@@ -11,20 +11,21 @@ import '../auth/auth.dart';
 import 'chat_room_state.dart';
 
 /// チャットルーム一覧を取得する StreamProvider。
-final chatRooms = StreamProvider.autoDispose<List<ChatRoom>>(
+final chatRoomsProvider = StreamProvider.autoDispose<List<ChatRoom>>(
   (ref) => ref.read(chatRepository).subscribeChatRooms(),
 );
 
 /// 指定したチャットルームの最新 1 件のメッセージを取得する Provider。
-final latestMessage = Provider.autoDispose.family<Message?, String>(
-  (ref, chatRoomId) => ref.watch(_latestMessages(Tuple2(chatRoomId, 1))).when(
+final latestMessageProvider = Provider.autoDispose.family<Message?, String>(
+  (ref, chatRoomId) => ref.watch(_latestMessagesProvider(Tuple2<String, int>(chatRoomId, 1))).when(
         data: (messages) => messages.isNotEmpty ? messages.first : null,
         error: (_, __) => null,
         loading: () => null,
       ),
 );
 
-final _latestMessages = StreamProvider.autoDispose.family<List<Message>, Tuple2<String, int>>(
+final _latestMessagesProvider =
+    StreamProvider.autoDispose.family<List<Message>, Tuple2<String, int>>(
   (ref, tuple2) => ref.read(chatRepository).subscribeMessages(
         chatRoomId: tuple2.item1,
         queryBuilder: (q) => q.orderBy('createdAt', descending: true).limit(tuple2.item2),
@@ -32,7 +33,8 @@ final _latestMessages = StreamProvider.autoDispose.family<List<Message>, Tuple2<
 );
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
-final chatModel = StateNotifierProvider.autoDispose.family<Chat, ChatRoomState, String>(Chat.new);
+final chatProvider =
+    StateNotifierProvider.autoDispose.family<Chat, ChatRoomState, String>(Chat.new);
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
 class Chat extends StateNotifier<ChatRoomState> {
@@ -47,7 +49,10 @@ class Chat extends StateNotifier<ChatRoomState> {
     });
   }
 
+  ///
   final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
+
+  ///
   final String _chatRoomId;
 
   /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
@@ -98,7 +103,7 @@ class Chat extends StateNotifier<ChatRoomState> {
     if (state.sending) {
       return;
     }
-    final userId = _ref.read(userIdAsyncValue).value;
+    final userId = _ref.read(userIdAsyncValueProvider).value;
     if (userId == null) {
       throw const AppException(message: 'メッセージの送信にはログインが必要です。');
     }
