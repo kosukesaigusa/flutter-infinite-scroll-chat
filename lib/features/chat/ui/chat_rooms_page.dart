@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../firestore/chat_room.dart';
+import '../../../utils/extensions/date_time.dart';
 import '../../../utils/loading.dart';
 import '../chat.dart';
 import 'chat_room_page.dart';
@@ -49,10 +50,12 @@ class _ChatRoom extends HookConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(chatRoom.chatRoomId),
-            if (message != null) Text(message.content),
-            if (chatRoom.updatedAt.dateTime != null)
-              Text(chatRoom.updatedAt.dateTime!.toIso8601String())
+            Text('チャットルーム ID：${chatRoom.chatRoomId}'),
+            if (message != null) ...[
+              Text('直近のメッセージ：${message.content}'),
+              if (message.createdAt.dateTime != null)
+                Text(message.createdAt.dateTime!.toYYYYMMDDHHMM()),
+            ]
           ],
         ),
       ),

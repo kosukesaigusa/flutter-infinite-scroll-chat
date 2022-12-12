@@ -137,8 +137,8 @@ class _DebugIndicator extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chatRoomId = ref.watch(_chatRoomIdProvider);
     final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
-    final lastReadDocumentId =
-        ref.watch(chatProvider(chatRoomId).select((s) => s.lastReadQueryDocumentSnapshot))?.id;
+    final state = ref.watch(chatProvider(chatRoomId));
+    final lastReadDocumentId = state.lastReadQueryDocumentSnapshot?.id;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -158,13 +158,19 @@ class _DebugIndicator extends HookConsumerWidget {
             '取得したメッセージ：${messages.length.withComma} 件',
             style: context.bodySmall!.copyWith(color: Colors.white),
           ),
-          if (lastReadDocumentId != null) ...[
-            const Gap(4),
+          Text(
+            '取得中？：${state.fetching}',
+            style: context.bodySmall!.copyWith(color: Colors.white),
+          ),
+          Text(
+            'まだ取得できる？：${state.hasMore}',
+            style: context.bodySmall!.copyWith(color: Colors.white),
+          ),
+          if (lastReadDocumentId != null)
             Text(
-              '最後に取得したドキュメント：$lastReadDocumentId',
+              '最後に取得したドキュメント ID：$lastReadDocumentId',
               style: context.bodySmall!.copyWith(color: Colors.white),
             ),
-          ],
           const Gap(8),
         ],
       ),
