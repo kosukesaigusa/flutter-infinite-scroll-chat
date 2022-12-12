@@ -52,7 +52,7 @@ class ChatRoomController {
   /// 画面に表示する messages に反映させるリスナーを初期化する。
   void _initializeNewMessagesSubscription() {
     _newMessagesSubscription = _ref
-        .read(chatRepository)
+        .read(baseChatRepositoryProvider)
         .subscribeMessages(
           chatRoomId: _chatRoomId,
           queryBuilder: (q) => q

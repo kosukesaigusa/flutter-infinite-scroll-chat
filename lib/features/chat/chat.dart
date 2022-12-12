@@ -12,7 +12,7 @@ import 'chat_room_state.dart';
 
 /// チャットルーム一覧を取得する StreamProvider。
 final chatRoomsProvider = StreamProvider.autoDispose<List<ChatRoom>>(
-  (ref) => ref.read(chatRepository).subscribeChatRooms(),
+  (ref) => ref.read(baseChatRepositoryProvider).subscribeChatRooms(),
 );
 
 /// 指定したチャットルームの最新 1 件のメッセージを取得する Provider。
@@ -24,9 +24,10 @@ final latestMessageProvider = Provider.autoDispose.family<Message?, String>(
       ),
 );
 
+/// 指定したチャットルームの指定子た最新件数のメッセージを購読する Provider。
 final _latestMessagesProvider =
     StreamProvider.autoDispose.family<List<Message>, Tuple2<String, int>>(
-  (ref, tuple2) => ref.read(chatRepository).subscribeMessages(
+  (ref, tuple2) => ref.read(baseChatRepositoryProvider).subscribeMessages(
         chatRoomId: tuple2.item1,
         queryBuilder: (q) => q.orderBy('createdAt', descending: true).limit(tuple2.item2),
       ),
@@ -66,7 +67,7 @@ class Chat extends StateNotifier<ChatRoomState> {
       return;
     }
     state = state.copyWith(fetching: true);
-    final qs = await _ref.read(chatRepository).loadMoreMessagesQuerySnapshot(
+    final qs = await _ref.read(baseChatRepositoryProvider).loadMoreMessagesQuerySnapshot(
           limit: limit,
           chatRoomId: _chatRoomId,
           lastReadQueryDocumentSnapshot: state.lastReadQueryDocumentSnapshot,

@@ -27,7 +27,8 @@ abstract class BaseChatRepository {
   });
 }
 
-final chatRepository = Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
+final baseChatRepositoryProvider =
+    Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
 
 class ChatRepository implements BaseChatRepository {
   @override

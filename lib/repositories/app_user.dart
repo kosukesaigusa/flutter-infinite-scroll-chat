@@ -17,7 +17,8 @@ abstract class BaseAppUserRepository {
   Future<void> setAppUser({required String appUserId});
 }
 
-final appUserRepositoryProvider = Provider.autoDispose((_) => AppUserRepository());
+final baseAppUserRepositoryProvider =
+    Provider.autoDispose<BaseAppUserRepository>((_) => AppUserRepository());
 
 class AppUserRepository implements BaseAppUserRepository {
   @override
