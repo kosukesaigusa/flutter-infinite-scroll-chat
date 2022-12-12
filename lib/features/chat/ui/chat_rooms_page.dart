@@ -17,7 +17,7 @@ class ChatRoomsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Chat Rooms')),
-      body: ref.watch(chatRooms).when(
+      body: ref.watch(chatRoomsProvider).when(
             data: (chatRooms) {
               return ListView.builder(
                 itemCount: chatRooms.length,
@@ -38,7 +38,7 @@ class _ChatRoom extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final message = ref.watch(latestMessage(chatRoom.chatRoomId));
+    final message = ref.watch(latestMessageProvider(chatRoom.chatRoomId));
     return InkWell(
       onTap: () => Navigator.pushNamed<void>(
         context,

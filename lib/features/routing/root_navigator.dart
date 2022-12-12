@@ -18,9 +18,9 @@ class RootNavigator extends HookConsumerWidget {
       child: Stack(
         children: [
           Navigator(
-            key: ref.watch(globalKey),
-            initialRoute: ref.watch(appRouter).initialRoute,
-            onGenerateRoute: ref.watch(appRouter).onGenerateRoute,
+            key: ref.watch(globalKeyProvider),
+            initialRoute: ref.watch(appRouterProvider).initialRoute,
+            onGenerateRoute: ref.watch(appRouterProvider).onGenerateRoute,
             onUnknownRoute: (settings) {
               final route = MaterialPageRoute<void>(
                 settings: settings,
@@ -29,8 +29,8 @@ class RootNavigator extends HookConsumerWidget {
               return route;
             },
           ),
-          if (ref.watch(showOverlayLoading)) const OverlayLoadingWidget(),
-          if (!(ref.watch(isSignedInAsyncValue).value ?? false))
+          if (ref.watch(showOverlayLoadingProvider)) const OverlayLoadingWidget(),
+          if (!(ref.watch(isSignedInAsyncValueProvider).value ?? false))
             const OverlayLoadingWidget(showLoadingWidget: false),
         ],
       ),

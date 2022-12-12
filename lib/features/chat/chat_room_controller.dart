@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../firestore/message.dart';
-import '../../repositories/chat.dart';
 import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
 import 'chat.dart';
@@ -16,15 +15,15 @@ const _limit = 10;
 /// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
 const _scrollValueThreshold = 0.8;
 
-final chatRoomController =
+final chatRoomControllerProvider =
     Provider.autoDispose.family<ChatRoomController, String>(ChatRoomController.new);
 
 /// チャットルームページでの各種操作を行うコントローラ。
 class ChatRoomController {
   ChatRoomController(
     this._ref,
-    this._chatRoomId,
-  ) : _chat = _ref.read(chatModel(_chatRoomId).notifier) {
+    String chatRoomId,
+  ) : _chat = _ref.read(chatProvider(chatRoomId).notifier) {
     _initialize();
     _ref.onDispose(() async {
       await _newMessagesSubscription.cancel();
@@ -34,40 +33,26 @@ class ChatRoomController {
   }
 
   final AutoDisposeProviderRef<ChatRoomController> _ref;
-  final String _chatRoomId;
-  final Chat _chat;
-  late StreamSubscription<List<Message>> _newMessagesSubscription;
-  late TextEditingController textEditingController;
-  late ScrollController scrollController;
+  late final Chat _chat;
+  late final StreamSubscription<List<Message>> _newMessagesSubscription;
+  late final TextEditingController textEditingController;
+  late final ScrollController scrollController;
 
-  /// 初期化処理。
-  /// コンストラクタメソッドと一緒にコールする。
-  Future<void> _initialize() async {
+  /// 初期化処理。コンストラクタメソッド内でコールする。
+  void _initialize() {
     _initializeScrollController();
     _initializeNewMessagesSubscription();
-    await _initializeTextEditingController();
+    _initializeTextEditingController();
   }
 
   /// 読み取り開始時刻以降のメッセージを購読して
   /// 画面に表示する messages に反映させるリスナーを初期化する。
   void _initializeNewMessagesSubscription() {
-    _newMessagesSubscription = _ref
-        .read(chatRepository)
-        .subscribeMessages(
-          chatRoomId: _chatRoomId,
-          queryBuilder: (q) => q
-              .orderBy('createdAt', descending: true)
-              .where('createdAt', isGreaterThanOrEqualTo: DateTime.now()),
-        )
-        .listen((newMessages) async {
-      _chat
-        ..updateNewMessages(newMessages)
-        ..updateMessages();
-    });
+    _newMessagesSubscription = _chat.newMessagesSubscription;
   }
 
   /// TextEditingController を初期化してリスナーを設定する。
-  Future<void> _initializeTextEditingController() async {
+  void _initializeTextEditingController() {
     textEditingController = TextEditingController();
     textEditingController.addListener(() {
       _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
@@ -90,15 +75,15 @@ class ChatRoomController {
   Future<void> send() async {
     final text = textEditingController.value.text;
     if (text.isEmpty) {
-      _ref.read(scaffoldMessengerService).showSnackBar('内容を入力してください。');
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('内容を入力してください。');
       return;
     }
     try {
       await _chat.sendMessage(text: text);
     } on AppException catch (e) {
-      _ref.read(scaffoldMessengerService).showSnackBarByException(e);
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
     } on FirebaseException catch (e) {
-      _ref.read(scaffoldMessengerService).showSnackBarByFirebaseException(e);
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
     } finally {
       textEditingController.clear();
       await scrollController.animateTo(

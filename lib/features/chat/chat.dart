@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
@@ -11,28 +14,32 @@ import '../auth/auth.dart';
 import 'chat_room_state.dart';
 
 /// チャットルーム一覧を取得する StreamProvider。
-final chatRooms = StreamProvider.autoDispose<List<ChatRoom>>(
-  (ref) => ref.read(chatRepository).subscribeChatRooms(),
+final chatRoomsProvider = StreamProvider.autoDispose<List<ChatRoom>>(
+  (ref) => ref.read(baseChatRepositoryProvider).subscribeChatRooms(),
 );
 
 /// 指定したチャットルームの最新 1 件のメッセージを取得する Provider。
-final latestMessage = Provider.autoDispose.family<Message?, String>(
-  (ref, chatRoomId) => ref.watch(_latestMessages(Tuple2(chatRoomId, 1))).when(
+final latestMessageProvider = Provider.autoDispose.family<Message?, String>(
+  (ref, chatRoomId) => ref.watch(latestMessagesProvider(Tuple2<String, int>(chatRoomId, 1))).when(
         data: (messages) => messages.isNotEmpty ? messages.first : null,
         error: (_, __) => null,
         loading: () => null,
       ),
 );
 
-final _latestMessages = StreamProvider.autoDispose.family<List<Message>, Tuple2<String, int>>(
-  (ref, tuple2) => ref.read(chatRepository).subscribeMessages(
+/// 指定したチャットルームの指定した最新件数のメッセージを購読する Provider。
+@visibleForTesting
+final latestMessagesProvider =
+    StreamProvider.autoDispose.family<List<Message>, Tuple2<String, int>>(
+  (ref, tuple2) => ref.read(baseChatRepositoryProvider).subscribeMessages(
         chatRoomId: tuple2.item1,
         queryBuilder: (q) => q.orderBy('createdAt', descending: true).limit(tuple2.item2),
       ),
 );
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
-final chatModel = StateNotifierProvider.autoDispose.family<Chat, ChatRoomState, String>(Chat.new);
+final chatProvider =
+    StateNotifierProvider.autoDispose.family<Chat, ChatRoomState, String>(Chat.new);
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
 class Chat extends StateNotifier<ChatRoomState> {
@@ -48,7 +55,23 @@ class Chat extends StateNotifier<ChatRoomState> {
   }
 
   final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
+
   final String _chatRoomId;
+
+  /// この時刻以降のメッセージを新たなメッセージとしてリアルタイム取得する。
+  final startDateTime = DateTime.now();
+
+  /// 新たに取得されるメッセージのサブスクリプション。
+  /// リスナーで state.newMessages を更新する。
+  StreamSubscription<List<Message>> get newMessagesSubscription => _ref
+      .read(baseChatRepositoryProvider)
+      .subscribeMessages(
+        chatRoomId: _chatRoomId,
+        queryBuilder: (q) => q
+            .orderBy('createdAt', descending: true)
+            .where('createdAt', isGreaterThanOrEqualTo: startDateTime),
+      )
+      .listen(_updateNewMessages);
 
   /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
   /// limit 件だけ取得する。
@@ -61,14 +84,13 @@ class Chat extends StateNotifier<ChatRoomState> {
       return;
     }
     state = state.copyWith(fetching: true);
-    final qs = await _ref.read(chatRepository).loadMoreMessagesQuerySnapshot(
+    final qs = await _ref.read(baseChatRepositoryProvider).loadMoreMessagesQuerySnapshot(
           limit: limit,
           chatRoomId: _chatRoomId,
           lastReadQueryDocumentSnapshot: state.lastReadQueryDocumentSnapshot,
         );
     final messages = qs.docs.map((qds) => qds.data()).toList();
-    updatePastMessages([...state.pastMessages, ...messages]);
-    updateMessages();
+    _updatePastMessages([...state.pastMessages, ...messages]);
     state = state.copyWith(
       fetching: false,
       lastReadQueryDocumentSnapshot: qs.docs.isNotEmpty ? qs.docs.last : null,
@@ -77,18 +99,22 @@ class Chat extends StateNotifier<ChatRoomState> {
   }
 
   /// 取得したメッセージ全体を更新する。
-  void updateMessages() {
+  void _updateMessages() {
     state = state.copyWith(messages: [...state.newMessages, ...state.pastMessages]);
   }
 
-  /// チャットルーム画面に遷移した後に新たに取得したメッセージを更新する。
-  void updateNewMessages(List<Message> newMessages) {
+  /// チャットルーム画面に遷移した後に新たに取得したメッセージを更新した後、
+  /// 取得したメッセージ全体も更新する。
+  void _updateNewMessages(List<Message> newMessages) {
     state = state.copyWith(newMessages: newMessages);
+    _updateMessages();
   }
 
-  /// チャットルーム画面を遡って取得した過去のメッセージを更新する。
-  void updatePastMessages(List<Message> pastMessages) {
+  /// チャットルーム画面を遡って取得した過去のメッセージを更新した後、
+  /// 取得したメッセージ全体も更新する。
+  void _updatePastMessages(List<Message> pastMessages) {
     state = state.copyWith(pastMessages: pastMessages);
+    _updateMessages();
   }
 
   /// メッセージを送信する。
@@ -98,7 +124,7 @@ class Chat extends StateNotifier<ChatRoomState> {
     if (state.sending) {
       return;
     }
-    final userId = _ref.read(userIdAsyncValue).value;
+    final userId = _ref.read(userIdAsyncValueProvider).value;
     if (userId == null) {
       throw const AppException(message: 'メッセージの送信にはログインが必要です。');
     }

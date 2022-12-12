@@ -6,13 +6,29 @@ import '../firestore/refs.dart';
 import '../utils/extensions/list.dart';
 import '../utils/logger.dart';
 
-final appUserRepository = Provider.autoDispose((_) => AppUserRepository());
+///
+final baseAppUserRepositoryProvider =
+    Provider.autoDispose<BaseAppUserRepository>((_) => throw UnimplementedError());
 
-class AppUserRepository {
+///
+abstract class BaseAppUserRepository {
   /// 指定した AppUser を取得する。
-  Future<AppUser?> fetchAppUser({
-    required String appUserId,
-  }) async {
+  Future<AppUser?> fetchAppUser({required String appUserId});
+
+  /// 指定した AppUser を購読する。
+  Stream<AppUser?> subscribeAppUser({required String appUserId});
+
+  /// 指定した userId のユーザードキュメントを作成する。
+  Future<void> setAppUser({required String appUserId});
+}
+
+final appUserRepositoryProvider =
+    Provider.autoDispose<BaseAppUserRepository>((_) => AppUserRepository());
+
+///
+class AppUserRepository implements BaseAppUserRepository {
+  @override
+  Future<AppUser?> fetchAppUser({required String appUserId}) async {
     final ds = await appUserRef(appUserId: appUserId).get();
     if (!ds.exists) {
       logger.warning('Document not found: ${ds.reference.path}');
@@ -21,19 +37,14 @@ class AppUserRepository {
     return ds.data();
   }
 
-  /// 指定した AppUser を購読する。
-  Stream<AppUser?> subscribeAppUser({
-    required String appUserId,
-  }) {
+  @override
+  Stream<AppUser?> subscribeAppUser({required String appUserId}) {
     final docStream = appUserRef(appUserId: appUserId).snapshots();
     return docStream.map((ds) => ds.data());
   }
 
-  /// 指定した userId のユーザードキュメントを作成する。
-  Future<void> setAppUser({
-    required String appUserId,
-    String? fcmToken,
-  }) async {
+  @override
+  Future<void> setAppUser({required String appUserId}) async {
     await appUserRef(appUserId: appUserId).set(
       AppUser(
         appUserId: appUserId,

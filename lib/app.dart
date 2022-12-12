@@ -10,7 +10,7 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(signInAnonymously).call();
+    ref.read(signInAnonymouslyProvider).call();
     return MaterialApp(
       key: UniqueKey(),
       title: 'Flutter Infinite Scroll Chat',

@@ -20,7 +20,7 @@ final appRoutes = <AppRoute>[
     path: ChatRoomPage.path,
     name: ChatRoomPage.name,
     builder: (context, state) => ProviderScope(
-      overrides: <Override>[appRouterState.overrideWithValue(state)],
+      overrides: <Override>[appRouterStateProvider.overrideWithValue(state)],
       child: const ChatRoomPage(key: ValueKey(ChatRoomPage.name)),
     ),
   ),
