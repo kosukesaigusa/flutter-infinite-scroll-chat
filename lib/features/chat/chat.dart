@@ -54,24 +54,24 @@ class Chat extends StateNotifier<ChatRoomState> {
     });
   }
 
-  ///
   final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
 
-  ///
   final String _chatRoomId;
 
-  ///
+  /// この時刻以降のメッセージを新たなメッセージとしてリアルタイム取得する。
+  final startDateTime = DateTime.now();
+
+  /// 新たに取得されるメッセージのサブスクリプション。
+  /// リスナーで state.newMessages を更新する。
   StreamSubscription<List<Message>> get newMessagesSubscription => _ref
-          .read(baseChatRepositoryProvider)
-          .subscribeMessages(
-            chatRoomId: _chatRoomId,
-            queryBuilder: (q) => q
-                .orderBy('createdAt', descending: true)
-                .where('createdAt', isGreaterThanOrEqualTo: DateTime.now()),
-          )
-          .listen((newMessages) async {
-        _updateNewMessages(newMessages);
-      });
+      .read(baseChatRepositoryProvider)
+      .subscribeMessages(
+        chatRoomId: _chatRoomId,
+        queryBuilder: (q) => q
+            .orderBy('createdAt', descending: true)
+            .where('createdAt', isGreaterThanOrEqualTo: startDateTime),
+      )
+      .listen(_updateNewMessages);
 
   /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
   /// limit 件だけ取得する。
