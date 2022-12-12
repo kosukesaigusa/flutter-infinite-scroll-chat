@@ -23,7 +23,8 @@ const double _senderIconSize = 24;
 /// 複数箇所で指定している背景等のグレー色。
 const _backgroundGrey = Color(0xfff1eef1);
 
-final _chatRoomId = Provider.autoDispose<String>(
+///
+final _chatRoomIdProvider = Provider.autoDispose<String>(
   (ref) {
     final state = ref.watch(appRouterStateProvider);
     final chatRoomId = state.params['chatRoomId'];
@@ -39,7 +40,7 @@ final _chatRoomId = Provider.autoDispose<String>(
 );
 
 /// チャットルームページ。
-class ChatRoomPage extends StatefulHookConsumerWidget {
+class ChatRoomPage extends HookConsumerWidget {
   const ChatRoomPage({super.key});
 
   static const path = '/chatRoom/:chatRoomId';
@@ -47,13 +48,8 @@ class ChatRoomPage extends StatefulHookConsumerWidget {
   static String location({required String chatRoomId}) => '/chatRoom/$chatRoomId';
 
   @override
-  ConsumerState<ChatRoomPage> createState() => _ChatRoomPageState();
-}
-
-class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
-  @override
-  Widget build(BuildContext context) {
-    final chatRoomId = ref.watch(_chatRoomId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chatRoomId = ref.watch(_chatRoomIdProvider);
     final controller = ref.watch(chatRoomControllerProvider(chatRoomId));
     final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
     final loading = ref.watch(chatProvider(chatRoomId).select((s) => s.loading));
@@ -139,7 +135,7 @@ class _DebugIndicator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatRoomId = ref.watch(_chatRoomId);
+    final chatRoomId = ref.watch(_chatRoomIdProvider);
     final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
     final lastReadDocumentId =
         ref.watch(chatProvider(chatRoomId).select((s) => s.lastReadQueryDocumentSnapshot))?.id;
