@@ -53,22 +53,22 @@ class ChatController {
 
   /// TextEditingController を初期化してリスナーを設定する。
   void _initializeTextEditingController() {
-    textEditingController = TextEditingController();
-    textEditingController.addListener(() {
-      _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
-    });
+    textEditingController = TextEditingController()
+      ..addListener(() {
+        _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
+      });
   }
 
   /// ListView の ScrollController を初期化して、
   /// 過去のメッセージを遡って取得するための Listener を設定する。
   void _initializeScrollController() {
-    scrollController = ScrollController();
-    scrollController.addListener(() async {
-      final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
-      if (scrollValue > _scrollValueThreshold) {
-        await _chat.loadMore(limit: _limit);
-      }
-    });
+    scrollController = ScrollController()
+      ..addListener(() async {
+        final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
+        if (scrollValue > _scrollValueThreshold) {
+          await _chat.loadMore(limit: _limit);
+        }
+      });
   }
 
   /// 読み取り開始時刻以降のメッセージを購読して
