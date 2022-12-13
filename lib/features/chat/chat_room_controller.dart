@@ -25,9 +25,17 @@ class ChatController {
   }
 
   final AutoDisposeProviderRef<ChatController> _ref;
+
+  /// チャットモデルのインスタンス。
   final Chat _chat;
+
+  /// 新着メッセージのサブスクリプション。
   late final StreamSubscription<List<Message>> _newMessagesSubscription;
+
+  /// メッセージ入力部分のコントローラ。
   late final TextEditingController textEditingController;
+
+  /// メッセージを表示する ListView のコントローラ。
   late final ScrollController scrollController;
 
   /// 無限スクロールで取得するメッセージ件数の limit 値。
