@@ -9,18 +9,12 @@ import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
 import 'chat.dart';
 
-/// 無限スクロールで取得するメッセージ件数の limit 値。
-const _limit = 10;
+final chatControllerProvider =
+    Provider.autoDispose.family<ChatController, String>(ChatController.new);
 
-/// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
-const _scrollValueThreshold = 0.8;
-
-final chatRoomControllerProvider =
-    Provider.autoDispose.family<ChatRoomController, String>(ChatRoomController.new);
-
-/// チャットルームページでの各種操作を行うコントローラ。
-class ChatRoomController {
-  ChatRoomController(
+/// チャット画面での各種操作を行うコントローラ。
+class ChatController {
+  ChatController(
     this._ref,
     String chatRoomId,
   ) : _chat = _ref.read(chatProvider(chatRoomId).notifier) {
@@ -32,11 +26,17 @@ class ChatRoomController {
     });
   }
 
-  final AutoDisposeProviderRef<ChatRoomController> _ref;
+  final AutoDisposeProviderRef<ChatController> _ref;
   late final Chat _chat;
   late final StreamSubscription<List<Message>> _newMessagesSubscription;
   late final TextEditingController textEditingController;
   late final ScrollController scrollController;
+
+  /// 無限スクロールで取得するメッセージ件数の limit 値。
+  static const _limit = 10;
+
+  /// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
+  static const _scrollValueThreshold = 0.8;
 
   /// 初期化処理。コンストラクタメソッド内でコールする。
   void _initialize() {

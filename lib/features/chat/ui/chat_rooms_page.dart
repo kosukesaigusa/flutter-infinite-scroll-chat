@@ -7,7 +7,7 @@ import '../../../utils/loading.dart';
 import '../chat.dart';
 import 'chat_room_page.dart';
 
-class ChatRoomsPage extends HookConsumerWidget {
+class ChatRoomsPage extends ConsumerWidget {
   const ChatRoomsPage({super.key});
 
   static const path = '/';
