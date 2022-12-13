@@ -46,7 +46,7 @@ class Chat extends StateNotifier<ChatRoomState> {
   Chat(this._ref, this._chatRoomId) : super(const ChatRoomState()) {
     Future<void>(() async {
       await Future.wait<void>([
-        loadMore(limit: 10),
+        loadMore(),
         // ChatPage に遷移直後のメッセージアイコンを意図的に見せるために最低でも 500 ms 待つ。
         Future<void>.delayed(const Duration(milliseconds: 500)),
       ]);
@@ -57,6 +57,9 @@ class Chat extends StateNotifier<ChatRoomState> {
   final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
 
   final String _chatRoomId;
+
+  /// 無限スクロールで取得するメッセージ件数の limit 値。
+  static const _limit = 10;
 
   /// この時刻以降のメッセージを新たなメッセージとしてリアルタイム取得する。
   final startDateTime = DateTime.now();
@@ -75,7 +78,7 @@ class Chat extends StateNotifier<ChatRoomState> {
 
   /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
   /// limit 件だけ取得する。
-  Future<void> loadMore({required int limit}) async {
+  Future<void> loadMore() async {
     if (!state.hasMore) {
       state = state.copyWith(fetching: false);
       return;
@@ -85,7 +88,7 @@ class Chat extends StateNotifier<ChatRoomState> {
     }
     state = state.copyWith(fetching: true);
     final qs = await _ref.read(baseChatRepositoryProvider).loadMoreMessagesQuerySnapshot(
-          limit: limit,
+          limit: _limit,
           chatRoomId: _chatRoomId,
           lastReadQueryDocumentSnapshot: state.lastReadQueryDocumentSnapshot,
         );
@@ -94,7 +97,7 @@ class Chat extends StateNotifier<ChatRoomState> {
     state = state.copyWith(
       fetching: false,
       lastReadQueryDocumentSnapshot: qs.docs.isNotEmpty ? qs.docs.last : null,
-      hasMore: qs.docs.length >= limit,
+      hasMore: qs.docs.length >= _limit,
     );
   }
 

@@ -38,9 +38,6 @@ class ChatController {
   /// メッセージを表示する ListView のコントローラ。
   late final ScrollController scrollController;
 
-  /// 無限スクロールで取得するメッセージ件数の limit 値。
-  static const _limit = 10;
-
   /// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
   static const _scrollValueThreshold = 0.8;
 
@@ -66,7 +63,7 @@ class ChatController {
       ..addListener(() async {
         final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
         if (scrollValue > _scrollValueThreshold) {
-          await _chat.loadMore(limit: _limit);
+          await _chat.loadMore();
         }
       });
   }
