@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:infinite_scroll_chat/firestore/chat_room.dart';
 import 'package:infinite_scroll_chat/firestore/message.dart';
 import 'package:infinite_scroll_chat/repositories/chat.dart';
+
+import '../firestore/refs.dart';
 
 class MockChatRepository implements BaseChatRepository {
   @override
@@ -9,9 +12,24 @@ class MockChatRepository implements BaseChatRepository {
     required int limit,
     required String chatRoomId,
     required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
+  }) =>
+      _query(
+        limit: limit,
+        chatRoomId: chatRoomId,
+        lastReadQueryDocumentSnapshot: lastReadQueryDocumentSnapshot,
+      ).limit(limit).get();
+
+  Query<Message> _query({
+    required int limit,
+    required String chatRoomId,
+    required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
   }) {
-    // TODO: implement loadMoreMessagesQuerySnapshot
-    throw UnimplementedError();
+    var query = mockMessagesRef(chatRoomId: chatRoomId).orderBy('createdAt', descending: true);
+    final qds = lastReadQueryDocumentSnapshot;
+    if (qds != null) {
+      query = query.startAfterDocument(qds);
+    }
+    return query.limit(limit);
   }
 
   @override
