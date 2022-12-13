@@ -124,6 +124,9 @@ class Chat extends StateNotifier<ChatRoomState> {
     if (state.sending) {
       return;
     }
+    if (text.isEmpty) {
+      throw const AppException(message: '内容を入力してください。');
+    }
     final userId = _ref.read(userIdAsyncValueProvider).value;
     if (userId == null) {
       throw const AppException(message: 'メッセージの送信にはログインが必要です。');

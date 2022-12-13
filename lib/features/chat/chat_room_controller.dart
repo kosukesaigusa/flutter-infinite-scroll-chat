@@ -74,23 +74,18 @@ class ChatRoomController {
   /// メッセージを送信する。
   Future<void> send() async {
     final text = textEditingController.value.text;
-    if (text.isEmpty) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('内容を入力してください。');
-      return;
-    }
     try {
       await _chat.sendMessage(text: text);
-    } on AppException catch (e) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
-    } on FirebaseException catch (e) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
-    } finally {
       textEditingController.clear();
       await scrollController.animateTo(
         0,
         duration: const Duration(milliseconds: 100),
         curve: Curves.linear,
       );
+    } on AppException catch (e) {
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
+    } on FirebaseException catch (e) {
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
     }
   }
 }
