@@ -50,7 +50,7 @@ class Chat extends StateNotifier<ChatRoomState> {
         // ChatPage に遷移直後のメッセージアイコンを意図的に見せるために最低でも 500 ms 待つ。
         Future<void>.delayed(const Duration(milliseconds: 500)),
       ]);
-      endLoading();
+      state = state.copyWith(loading: false);
     });
   }
 
@@ -148,14 +148,6 @@ class Chat extends StateNotifier<ChatRoomState> {
     } finally {
       state = state.copyWith(sending: false);
     }
-  }
-
-  void startLoading() {
-    state = state.copyWith(loading: true);
-  }
-
-  void endLoading() {
-    state = state.copyWith(loading: false);
   }
 
   void updateIsValid({required bool isValid}) {
