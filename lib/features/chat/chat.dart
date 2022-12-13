@@ -56,6 +56,7 @@ class Chat extends StateNotifier<ChatRoomState> {
 
   final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
 
+  /// チャットルームの ID。
   final String _chatRoomId;
 
   /// 無限スクロールで取得するメッセージ件数の limit 値。
