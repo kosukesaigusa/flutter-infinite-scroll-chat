@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'chat_room_state.dart';
+part of 'chat_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,7 +15,7 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
-mixin _$ChatRoomState {
+mixin _$ChatState {
   bool get loading => throw _privateConstructorUsedError;
   bool get sending => throw _privateConstructorUsedError;
   bool get isValid => throw _privateConstructorUsedError;
@@ -28,15 +28,14 @@ mixin _$ChatRoomState {
       throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $ChatRoomStateCopyWith<ChatRoomState> get copyWith =>
+  $ChatStateCopyWith<ChatState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ChatRoomStateCopyWith<$Res> {
-  factory $ChatRoomStateCopyWith(
-          ChatRoomState value, $Res Function(ChatRoomState) then) =
-      _$ChatRoomStateCopyWithImpl<$Res, ChatRoomState>;
+abstract class $ChatStateCopyWith<$Res> {
+  factory $ChatStateCopyWith(ChatState value, $Res Function(ChatState) then) =
+      _$ChatStateCopyWithImpl<$Res, ChatState>;
   @useResult
   $Res call(
       {bool loading,
@@ -51,9 +50,9 @@ abstract class $ChatRoomStateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatRoomStateCopyWithImpl<$Res, $Val extends ChatRoomState>
-    implements $ChatRoomStateCopyWith<$Res> {
-  _$ChatRoomStateCopyWithImpl(this._value, this._then);
+class _$ChatStateCopyWithImpl<$Res, $Val extends ChatState>
+    implements $ChatStateCopyWith<$Res> {
+  _$ChatStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -116,7 +115,7 @@ class _$ChatRoomStateCopyWithImpl<$Res, $Val extends ChatRoomState>
 
 /// @nodoc
 abstract class _$$_ChatRoomStateCopyWith<$Res>
-    implements $ChatRoomStateCopyWith<$Res> {
+    implements $ChatStateCopyWith<$Res> {
   factory _$$_ChatRoomStateCopyWith(
           _$_ChatRoomState value, $Res Function(_$_ChatRoomState) then) =
       __$$_ChatRoomStateCopyWithImpl<$Res>;
@@ -136,7 +135,7 @@ abstract class _$$_ChatRoomStateCopyWith<$Res>
 
 /// @nodoc
 class __$$_ChatRoomStateCopyWithImpl<$Res>
-    extends _$ChatRoomStateCopyWithImpl<$Res, _$_ChatRoomState>
+    extends _$ChatStateCopyWithImpl<$Res, _$_ChatRoomState>
     implements _$$_ChatRoomStateCopyWith<$Res> {
   __$$_ChatRoomStateCopyWithImpl(
       _$_ChatRoomState _value, $Res Function(_$_ChatRoomState) _then)
@@ -260,7 +259,7 @@ class _$_ChatRoomState implements _ChatRoomState {
 
   @override
   String toString() {
-    return 'ChatRoomState(loading: $loading, sending: $sending, isValid: $isValid, messages: $messages, newMessages: $newMessages, pastMessages: $pastMessages, fetching: $fetching, hasMore: $hasMore, lastReadQueryDocumentSnapshot: $lastReadQueryDocumentSnapshot)';
+    return 'ChatState(loading: $loading, sending: $sending, isValid: $isValid, messages: $messages, newMessages: $newMessages, pastMessages: $pastMessages, fetching: $fetching, hasMore: $hasMore, lastReadQueryDocumentSnapshot: $lastReadQueryDocumentSnapshot)';
   }
 
   @override
@@ -305,7 +304,7 @@ class _$_ChatRoomState implements _ChatRoomState {
       __$$_ChatRoomStateCopyWithImpl<_$_ChatRoomState>(this, _$identity);
 }
 
-abstract class _ChatRoomState implements ChatRoomState {
+abstract class _ChatRoomState implements ChatState {
   const factory _ChatRoomState(
       {final bool loading,
       final bool sending,

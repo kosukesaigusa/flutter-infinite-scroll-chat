@@ -11,7 +11,7 @@ import '../../repositories/chat.dart';
 import '../../utils/exceptions/base.dart';
 import '../../utils/uuid.dart';
 import '../auth/auth.dart';
-import 'chat_room_state.dart';
+import 'chat_state.dart';
 
 /// チャットルーム一覧を取得する StreamProvider。
 final chatRoomsProvider = StreamProvider.autoDispose<List<ChatRoom>>(
@@ -38,12 +38,11 @@ final latestMessagesProvider =
 );
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
-final chatProvider =
-    StateNotifierProvider.autoDispose.family<Chat, ChatRoomState, String>(Chat.new);
+final chatProvider = StateNotifierProvider.autoDispose.family<Chat, ChatState, String>(Chat.new);
 
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
-class Chat extends StateNotifier<ChatRoomState> {
-  Chat(this._ref, this._chatRoomId) : super(const ChatRoomState()) {
+class Chat extends StateNotifier<ChatState> {
+  Chat(this._ref, this._chatRoomId) : super(const ChatState()) {
     Future<void>(() async {
       await Future.wait<void>([
         loadMore(),
@@ -54,7 +53,7 @@ class Chat extends StateNotifier<ChatRoomState> {
     });
   }
 
-  final AutoDisposeStateNotifierProviderRef<Chat, ChatRoomState> _ref;
+  final AutoDisposeStateNotifierProviderRef<Chat, ChatState> _ref;
 
   /// チャットルームの ID。
   final String _chatRoomId;

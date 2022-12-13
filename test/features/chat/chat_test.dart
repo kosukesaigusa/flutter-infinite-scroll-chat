@@ -91,28 +91,28 @@ void main() {
           );
 
           final chat = container.read(chatProvider(chatRoomId).notifier);
-          await chat.loadMore(limit: 10);
+          await chat.loadMore();
 
           expect(container.read(chatProvider(chatRoomId)).messages.length, 10);
           expect(container.read(chatProvider(chatRoomId)).newMessages.length, 0);
           expect(container.read(chatProvider(chatRoomId)).pastMessages.length, 10);
           expect(container.read(chatProvider(chatRoomId)).hasMore, true);
 
-          await chat.loadMore(limit: 10);
+          await chat.loadMore();
 
           expect(container.read(chatProvider(chatRoomId)).messages.length, 20);
           expect(container.read(chatProvider(chatRoomId)).newMessages.length, 0);
           expect(container.read(chatProvider(chatRoomId)).pastMessages.length, 20);
           expect(container.read(chatProvider(chatRoomId)).hasMore, true);
 
-          await chat.loadMore(limit: 10);
+          await chat.loadMore();
 
           expect(container.read(chatProvider(chatRoomId)).messages.length, 30);
           expect(container.read(chatProvider(chatRoomId)).newMessages.length, 0);
           expect(container.read(chatProvider(chatRoomId)).pastMessages.length, 30);
           expect(container.read(chatProvider(chatRoomId)).hasMore, true);
 
-          await chat.loadMore(limit: 10);
+          await chat.loadMore();
 
           expect(container.read(chatProvider(chatRoomId)).messages.length, 35);
           expect(container.read(chatProvider(chatRoomId)).newMessages.length, 0);

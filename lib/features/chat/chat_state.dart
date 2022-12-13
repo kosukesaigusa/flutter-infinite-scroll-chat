@@ -3,11 +3,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../firestore/message.dart';
 
-part 'chat_room_state.freezed.dart';
+part 'chat_state.freezed.dart';
 
 @freezed
-class ChatRoomState with _$ChatRoomState {
-  const factory ChatRoomState({
+class ChatState with _$ChatState {
+  const factory ChatState({
     @Default(true) bool loading,
     @Default(false) bool sending,
     @Default(false) bool isValid,
