@@ -40,7 +40,7 @@ final latestMessagesProvider =
 /// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
 final chatProvider = StateNotifierProvider.autoDispose.family<Chat, ChatState, String>(Chat.new);
 
-/// ChatRoomState の操作とチャットルームページの振る舞いを記述したモデル。
+/// ChatRoomState の操作とチャット機能の振る舞いを記述したモデル。
 class Chat extends StateNotifier<ChatState> {
   Chat(this._ref, this._chatRoomId) : super(const ChatState()) {
     Future<void>(() async {
@@ -76,8 +76,7 @@ class Chat extends StateNotifier<ChatState> {
       )
       .listen(_updateNewMessages);
 
-  /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の
-  /// limit 件だけ取得する。
+  /// 過去のメッセージを、最後に取得した queryDocumentSnapshot 以降の _limit 件だけ取得する。
   Future<void> loadMore() async {
     if (!state.hasMore) {
       state = state.copyWith(fetching: false);

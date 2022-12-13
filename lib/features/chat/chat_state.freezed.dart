@@ -16,14 +16,31 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ChatState {
+  /// チャットページに入ったときの初回ローディング中かどうか。
   bool get loading => throw _privateConstructorUsedError;
+
+  /// メッセージを送信中かどうか。
   bool get sending => throw _privateConstructorUsedError;
+
+  /// メッセージの内容のバリデーションに成功しているかどうか。
   bool get isValid => throw _privateConstructorUsedError;
+
+  /// 取得したメッセージ全体。
   List<Message> get messages => throw _privateConstructorUsedError;
+
+  /// 取得した新着メッセージ。
   List<Message> get newMessages => throw _privateConstructorUsedError;
+
+  /// 遡って取得した過去のメッセージ。
   List<Message> get pastMessages => throw _privateConstructorUsedError;
+
+  /// 無限スクロールで遡って過去のメッセージを取得中かどうか。
   bool get fetching => throw _privateConstructorUsedError;
+
+  /// 無限スクロールで遡る際にまだ取得するメッセージが残っているかどうか。
   bool get hasMore => throw _privateConstructorUsedError;
+
+  /// 無限スクロールで遡って取得した最後のドキュメントのクエリスナップショット。
   QueryDocumentSnapshot<Message>? get lastReadQueryDocumentSnapshot =>
       throw _privateConstructorUsedError;
 
@@ -212,16 +229,25 @@ class _$_ChatRoomState implements _ChatRoomState {
         _newMessages = newMessages,
         _pastMessages = pastMessages;
 
+  /// チャットページに入ったときの初回ローディング中かどうか。
   @override
   @JsonKey()
   final bool loading;
+
+  /// メッセージを送信中かどうか。
   @override
   @JsonKey()
   final bool sending;
+
+  /// メッセージの内容のバリデーションに成功しているかどうか。
   @override
   @JsonKey()
   final bool isValid;
+
+  /// 取得したメッセージ全体。
   final List<Message> _messages;
+
+  /// 取得したメッセージ全体。
   @override
   @JsonKey()
   List<Message> get messages {
@@ -230,7 +256,10 @@ class _$_ChatRoomState implements _ChatRoomState {
     return EqualUnmodifiableListView(_messages);
   }
 
+  /// 取得した新着メッセージ。
   final List<Message> _newMessages;
+
+  /// 取得した新着メッセージ。
   @override
   @JsonKey()
   List<Message> get newMessages {
@@ -239,7 +268,10 @@ class _$_ChatRoomState implements _ChatRoomState {
     return EqualUnmodifiableListView(_newMessages);
   }
 
+  /// 遡って取得した過去のメッセージ。
   final List<Message> _pastMessages;
+
+  /// 遡って取得した過去のメッセージ。
   @override
   @JsonKey()
   List<Message> get pastMessages {
@@ -248,12 +280,17 @@ class _$_ChatRoomState implements _ChatRoomState {
     return EqualUnmodifiableListView(_pastMessages);
   }
 
+  /// 無限スクロールで遡って過去のメッセージを取得中かどうか。
   @override
   @JsonKey()
   final bool fetching;
+
+  /// 無限スクロールで遡る際にまだ取得するメッセージが残っているかどうか。
   @override
   @JsonKey()
   final bool hasMore;
+
+  /// 無限スクロールで遡って取得した最後のドキュメントのクエリスナップショット。
   @override
   final QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot;
 
@@ -318,22 +355,40 @@ abstract class _ChatRoomState implements ChatState {
           lastReadQueryDocumentSnapshot}) = _$_ChatRoomState;
 
   @override
+
+  /// チャットページに入ったときの初回ローディング中かどうか。
   bool get loading;
   @override
+
+  /// メッセージを送信中かどうか。
   bool get sending;
   @override
+
+  /// メッセージの内容のバリデーションに成功しているかどうか。
   bool get isValid;
   @override
+
+  /// 取得したメッセージ全体。
   List<Message> get messages;
   @override
+
+  /// 取得した新着メッセージ。
   List<Message> get newMessages;
   @override
+
+  /// 遡って取得した過去のメッセージ。
   List<Message> get pastMessages;
   @override
+
+  /// 無限スクロールで遡って過去のメッセージを取得中かどうか。
   bool get fetching;
   @override
+
+  /// 無限スクロールで遡る際にまだ取得するメッセージが残っているかどうか。
   bool get hasMore;
   @override
+
+  /// 無限スクロールで遡って取得した最後のドキュメントのクエリスナップショット。
   QueryDocumentSnapshot<Message>? get lastReadQueryDocumentSnapshot;
   @override
   @JsonKey(ignore: true)
