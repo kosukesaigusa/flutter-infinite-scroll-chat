@@ -9,21 +9,13 @@ import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
 import 'chat.dart';
 
-/// 無限スクロールで取得するメッセージ件数の limit 値。
-const _limit = 10;
+final chatControllerProvider = Provider.autoDispose.family<ChatController, String>(
+  (ref, chatRoomId) => ChatController(ref, ref.read(chatProvider(chatRoomId).notifier)),
+);
 
-/// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
-const _scrollValueThreshold = 0.8;
-
-final chatRoomControllerProvider =
-    Provider.autoDispose.family<ChatRoomController, String>(ChatRoomController.new);
-
-/// チャットルームページでの各種操作を行うコントローラ。
-class ChatRoomController {
-  ChatRoomController(
-    this._ref,
-    String chatRoomId,
-  ) : _chat = _ref.read(chatProvider(chatRoomId).notifier) {
+/// チャット画面での各種操作を行うコントローラ。
+class ChatController {
+  ChatController(this._ref, this._chat) {
     _initialize();
     _ref.onDispose(() async {
       await _newMessagesSubscription.cancel();
@@ -32,17 +24,51 @@ class ChatRoomController {
     });
   }
 
-  final AutoDisposeProviderRef<ChatRoomController> _ref;
-  late final Chat _chat;
+  final AutoDisposeProviderRef<ChatController> _ref;
+
+  /// チャットモデルのインスタンス。
+  final Chat _chat;
+
+  /// 新着メッセージのサブスクリプション。
   late final StreamSubscription<List<Message>> _newMessagesSubscription;
+
+  /// メッセージ入力部分のコントローラ。
   late final TextEditingController textEditingController;
+
+  /// メッセージを表示する ListView のコントローラ。
   late final ScrollController scrollController;
+
+  /// 無限スクロールで取得するメッセージ件数の limit 値。
+  static const _limit = 10;
+
+  /// 画面の何割をスクロールした時点で次の _limit 件のメッセージを取得するか。
+  static const _scrollValueThreshold = 0.8;
 
   /// 初期化処理。コンストラクタメソッド内でコールする。
   void _initialize() {
+    _initializeTextEditingController();
     _initializeScrollController();
     _initializeNewMessagesSubscription();
-    _initializeTextEditingController();
+  }
+
+  /// TextEditingController を初期化してリスナーを設定する。
+  void _initializeTextEditingController() {
+    textEditingController = TextEditingController()
+      ..addListener(() {
+        _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
+      });
+  }
+
+  /// ListView の ScrollController を初期化して、
+  /// 過去のメッセージを遡って取得するための Listener を設定する。
+  void _initializeScrollController() {
+    scrollController = ScrollController()
+      ..addListener(() async {
+        final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
+        if (scrollValue > _scrollValueThreshold) {
+          await _chat.loadMore(limit: _limit);
+        }
+      });
   }
 
   /// 読み取り開始時刻以降のメッセージを購読して
@@ -51,46 +77,21 @@ class ChatRoomController {
     _newMessagesSubscription = _chat.newMessagesSubscription;
   }
 
-  /// TextEditingController を初期化してリスナーを設定する。
-  void _initializeTextEditingController() {
-    textEditingController = TextEditingController();
-    textEditingController.addListener(() {
-      _chat.updateIsValid(isValid: textEditingController.value.text.isNotEmpty);
-    });
-  }
-
-  /// ListView の ScrollController を初期化して、
-  /// 過去のメッセージを遡って取得するための Listener を設定する。
-  void _initializeScrollController() {
-    scrollController = ScrollController();
-    scrollController.addListener(() async {
-      final scrollValue = scrollController.offset / scrollController.position.maxScrollExtent;
-      if (scrollValue > _scrollValueThreshold) {
-        await _chat.loadMore(limit: _limit);
-      }
-    });
-  }
-
   /// メッセージを送信する。
   Future<void> send() async {
     final text = textEditingController.value.text;
-    if (text.isEmpty) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBar('内容を入力してください。');
-      return;
-    }
     try {
       await _chat.sendMessage(text: text);
-    } on AppException catch (e) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
-    } on FirebaseException catch (e) {
-      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
-    } finally {
       textEditingController.clear();
       await scrollController.animateTo(
         0,
         duration: const Duration(milliseconds: 100),
         curve: Curves.linear,
       );
+    } on AppException catch (e) {
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByException(e);
+    } on FirebaseException catch (e) {
+      _ref.read(scaffoldMessengerServiceProvider).showSnackBarByFirebaseException(e);
     }
   }
 }

@@ -23,7 +23,7 @@ const double _senderIconSize = 24;
 /// 複数箇所で指定している背景等のグレー色。
 const _backgroundGrey = Color(0xfff1eef1);
 
-///
+/// パスパラメータからチャットルームの ID を取得する Provider。
 final _chatRoomIdProvider = Provider.autoDispose<String>(
   (ref) {
     final state = ref.watch(appRouterStateProvider);
@@ -40,7 +40,7 @@ final _chatRoomIdProvider = Provider.autoDispose<String>(
 );
 
 /// チャットルームページ。
-class ChatRoomPage extends HookConsumerWidget {
+class ChatRoomPage extends ConsumerWidget {
   const ChatRoomPage({super.key});
 
   static const path = '/chatRoom/:chatRoomId';
@@ -50,7 +50,7 @@ class ChatRoomPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatRoomId = ref.watch(_chatRoomIdProvider);
-    final controller = ref.watch(chatRoomControllerProvider(chatRoomId));
+    final controller = ref.watch(chatControllerProvider(chatRoomId));
     final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
     final loading = ref.watch(chatProvider(chatRoomId).select((s) => s.loading));
     final userId = ref.watch(userIdAsyncValueProvider).value;
@@ -137,8 +137,8 @@ class _DebugIndicator extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final chatRoomId = ref.watch(_chatRoomIdProvider);
     final messages = ref.watch(chatProvider(chatRoomId).select((s) => s.messages));
-    final lastReadDocumentId =
-        ref.watch(chatProvider(chatRoomId).select((s) => s.lastReadQueryDocumentSnapshot))?.id;
+    final state = ref.watch(chatProvider(chatRoomId));
+    final lastReadDocumentId = state.lastReadQueryDocumentSnapshot?.id;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -158,13 +158,19 @@ class _DebugIndicator extends HookConsumerWidget {
             '取得したメッセージ：${messages.length.withComma} 件',
             style: context.bodySmall!.copyWith(color: Colors.white),
           ),
-          if (lastReadDocumentId != null) ...[
-            const Gap(4),
+          Text(
+            '取得中？：${state.fetching}',
+            style: context.bodySmall!.copyWith(color: Colors.white),
+          ),
+          Text(
+            'まだ取得できる？：${state.hasMore}',
+            style: context.bodySmall!.copyWith(color: Colors.white),
+          ),
+          if (lastReadDocumentId != null)
             Text(
-              '最後に取得したドキュメント：$lastReadDocumentId',
+              '最後に取得したドキュメント ID：$lastReadDocumentId',
               style: context.bodySmall!.copyWith(color: Colors.white),
             ),
-          ],
           const Gap(8),
         ],
       ),
@@ -352,7 +358,7 @@ class _RoomMessageInput extends HookConsumerWidget {
               color: _backgroundGrey,
             ),
             child: TextField(
-              controller: ref.watch(chatRoomControllerProvider(chatRoomId)).textEditingController,
+              controller: ref.watch(chatControllerProvider(chatRoomId)).textEditingController,
               minLines: 1,
               maxLines: 5,
               decoration: InputDecoration(
@@ -377,7 +383,7 @@ class _RoomMessageInput extends HookConsumerWidget {
             if (!ref.read(chatProvider(chatRoomId)).isValid) {
               return;
             }
-            await ref.read(chatRoomControllerProvider(chatRoomId)).send();
+            await ref.read(chatControllerProvider(chatRoomId)).send();
           },
           child: Container(
             margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),

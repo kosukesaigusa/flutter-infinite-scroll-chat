@@ -60,14 +60,12 @@ class ChatRepository implements BaseChatRepository {
     required int limit,
     required String chatRoomId,
     required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
-  }) async {
-    final qs = await _query(
-      limit: limit,
-      chatRoomId: chatRoomId,
-      lastReadQueryDocumentSnapshot: lastReadQueryDocumentSnapshot,
-    ).limit(limit).get();
-    return qs;
-  }
+  }) =>
+      _query(
+        limit: limit,
+        chatRoomId: chatRoomId,
+        lastReadQueryDocumentSnapshot: lastReadQueryDocumentSnapshot,
+      ).limit(limit).get();
 
   /// 最後に取得したドキュメント以降のメッセージ limit 件を取得するための
   /// Query<Message> を返す。メッセージの無限スクロールに用いる。

@@ -61,7 +61,7 @@ class Chat extends StateNotifier<ChatRoomState> {
   /// この時刻以降のメッセージを新たなメッセージとしてリアルタイム取得する。
   final startDateTime = DateTime.now();
 
-  /// 新たに取得されるメッセージのサブスクリプション。
+  /// 新着メッセージのサブスクリプション。
   /// リスナーで state.newMessages を更新する。
   StreamSubscription<List<Message>> get newMessagesSubscription => _ref
       .read(baseChatRepositoryProvider)
@@ -123,6 +123,9 @@ class Chat extends StateNotifier<ChatRoomState> {
   }) async {
     if (state.sending) {
       return;
+    }
+    if (text.isEmpty) {
+      throw const AppException(message: '内容を入力してください。');
     }
     final userId = _ref.read(userIdAsyncValueProvider).value;
     if (userId == null) {
