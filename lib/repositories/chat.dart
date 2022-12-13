@@ -9,7 +9,7 @@ import '../firestore/refs.dart';
 final baseChatRepositoryProvider =
     Provider.autoDispose<BaseChatRepository>((_) => throw UnimplementedError());
 
-///
+/// チャット機能関係のリポジトリのインターフェース。
 abstract class BaseChatRepository {
   /// ChatRoom 一覧を購読する。
   Stream<List<ChatRoom>> subscribeChatRooms({
@@ -35,7 +35,7 @@ abstract class BaseChatRepository {
 ///
 final chatRepositoryProvider = Provider.autoDispose<BaseChatRepository>((_) => ChatRepository());
 
-///
+/// チャット機能関係の、データソースが Firestore であるリポジトリの実装クラス。
 class ChatRepository implements BaseChatRepository {
   @override
   Stream<List<ChatRoom>> subscribeChatRooms({
@@ -60,26 +60,13 @@ class ChatRepository implements BaseChatRepository {
     required int limit,
     required String chatRoomId,
     required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
-  }) =>
-      _query(
-        limit: limit,
-        chatRoomId: chatRoomId,
-        lastReadQueryDocumentSnapshot: lastReadQueryDocumentSnapshot,
-      ).limit(limit).get();
-
-  /// 最後に取得したドキュメント以降のメッセージ limit 件を取得するための
-  /// Query<Message> を返す。メッセージの無限スクロールに用いる。
-  Query<Message> _query({
-    required int limit,
-    required String chatRoomId,
-    required QueryDocumentSnapshot<Message>? lastReadQueryDocumentSnapshot,
   }) {
     var query = messagesRef(chatRoomId: chatRoomId).orderBy('createdAt', descending: true);
     final qds = lastReadQueryDocumentSnapshot;
     if (qds != null) {
       query = query.startAfterDocument(qds);
     }
-    return query.limit(limit);
+    return query.limit(limit).get();
   }
 
   @override
