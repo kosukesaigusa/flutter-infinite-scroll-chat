@@ -9,15 +9,13 @@ import '../../utils/exceptions/base.dart';
 import '../../utils/scaffold_messenger_service.dart';
 import 'chat.dart';
 
-final chatControllerProvider =
-    Provider.autoDispose.family<ChatController, String>(ChatController.new);
+final chatControllerProvider = Provider.autoDispose.family<ChatController, String>(
+  (ref, chatRoomId) => ChatController(ref, ref.read(chatProvider(chatRoomId).notifier)),
+);
 
 /// チャット画面での各種操作を行うコントローラ。
 class ChatController {
-  ChatController(
-    this._ref,
-    String chatRoomId,
-  ) : _chat = _ref.read(chatProvider(chatRoomId).notifier) {
+  ChatController(this._ref, this._chat) {
     _initialize();
     _ref.onDispose(() async {
       await _newMessagesSubscription.cancel();
@@ -27,7 +25,7 @@ class ChatController {
   }
 
   final AutoDisposeProviderRef<ChatController> _ref;
-  late final Chat _chat;
+  final Chat _chat;
   late final StreamSubscription<List<Message>> _newMessagesSubscription;
   late final TextEditingController textEditingController;
   late final ScrollController scrollController;
@@ -40,15 +38,9 @@ class ChatController {
 
   /// 初期化処理。コンストラクタメソッド内でコールする。
   void _initialize() {
+    _initializeTextEditingController();
     _initializeScrollController();
     _initializeNewMessagesSubscription();
-    _initializeTextEditingController();
-  }
-
-  /// 読み取り開始時刻以降のメッセージを購読して
-  /// 画面に表示する messages に反映させるリスナーを初期化する。
-  void _initializeNewMessagesSubscription() {
-    _newMessagesSubscription = _chat.newMessagesSubscription;
   }
 
   /// TextEditingController を初期化してリスナーを設定する。
@@ -69,6 +61,12 @@ class ChatController {
         await _chat.loadMore(limit: _limit);
       }
     });
+  }
+
+  /// 読み取り開始時刻以降のメッセージを購読して
+  /// 画面に表示する messages に反映させるリスナーを初期化する。
+  void _initializeNewMessagesSubscription() {
+    _newMessagesSubscription = _chat.newMessagesSubscription;
   }
 
   /// メッセージを送信する。
